@@ -1,19 +1,15 @@
 class_name Damage
 extends RefCounted
 
-## Blast damage model.
+## Blast contact model.
 ##
-## Linear falloff from the centre out to BLAST_RADIUS. Linear rather than
-## quadratic on purpose: near misses need to be worth something, otherwise the
-## only viable play is a pixel-perfect direct hit and ranging shots feel wasted.
+## Two hits and a machine is out — a graze at the edge of the blast counts the
+## same as a bullseye, which is what makes "did it land close enough" the only
+## question worth asking rather than a race to stack fractional damage.
 
 const BLAST_RADIUS := 96.0   ## px, beyond this a shot does nothing
-const MAX_DAMAGE := 42.0     ## dealt at the centre of the blast
 const CRATER_RADIUS := 72.0  ## px, how much ground a shot removes
 
-## Damage dealt to a target `distance` px from the impact point.
-static func at_distance(distance: float) -> int:
-	if distance >= BLAST_RADIUS:
-		return 0
-	var falloff := 1.0 - distance / BLAST_RADIUS
-	return int(round(MAX_DAMAGE * falloff))
+## Whether a target `distance` px from the impact point counts as struck.
+static func is_hit(distance: float) -> bool:
+	return distance < BLAST_RADIUS

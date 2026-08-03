@@ -12,13 +12,25 @@ const MIN_SPEED := 250.0      ## px/s at 0% force
 const MAX_SPEED := 1000.0     ## px/s at 100% force
 const SUBSTEP := 1.0 / 240.0  ## fixed integration step, independent of framerate
 
+## The dial angle as the ground under the catapult actually sees it.
+##
+## `ground_tilt_rad` is signed so that leaning into the shot — downhill in the
+## direction the catapult fires — is positive, the same convention Catapult
+## uses for its own body rotation. A single subtraction then works for either
+## facing without this function needing to know which way the machine points:
+## leaning forward lowers the dial angle, leaning back raises it.
+static func tilted_angle_deg(angle_deg: float, ground_tilt_rad: float) -> float:
+	return angle_deg - rad_to_deg(ground_tilt_rad)
+
 ## Muzzle velocity for an aim.
-##   angle_deg  0 = horizontal, 90 = straight up
-##   power_pct  0..100
-##   facing     +1 aims right, -1 aims left
-static func launch_velocity(angle_deg: float, power_pct: float, facing: int) -> Vector2:
+##   angle_deg       0 = horizontal, 90 = straight up, before any ground tilt
+##   power_pct       0..100
+##   facing          +1 aims right, -1 aims left
+##   ground_tilt_rad see tilted_angle_deg(). Zero on flat ground, the default.
+static func launch_velocity(angle_deg: float, power_pct: float, facing: int,
+		ground_tilt_rad := 0.0) -> Vector2:
 	var speed := MIN_SPEED + (MAX_SPEED - MIN_SPEED) * clampf(power_pct, 0.0, 100.0) / 100.0
-	var a := deg_to_rad(clampf(angle_deg, 0.0, 90.0))
+	var a := deg_to_rad(tilted_angle_deg(angle_deg, ground_tilt_rad))
 	return Vector2(cos(a) * speed * signf(facing), -sin(a) * speed)
 
 ## Advance one fixed substep. Wind is a constant horizontal acceleration.

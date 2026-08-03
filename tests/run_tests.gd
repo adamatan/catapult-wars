@@ -9,10 +9,12 @@ var _checks := 0
 
 func _init() -> void:
 	_test_launch_velocity()
+	_test_ground_tilt()
 	_test_integrator_matches_closed_form()
 	_test_damage_falloff()
 	_test_terrain_generation()
 	_test_crater()
+	_test_lives()
 	_test_turn_rotation()
 	_test_manifest()
 
@@ -59,6 +61,28 @@ func _test_launch_velocity() -> void:
 	check("facing mirrors horizontal velocity", is_equal_approx(left.x, -right.x))
 	check("facing leaves vertical velocity alone", is_equal_approx(left.y, right.y))
 
+func _test_ground_tilt() -> void:
+	print("ballistics.tilted_angle_deg")
+	check_near("flat ground leaves the dial angle alone",
+		Ballistics.tilted_angle_deg(45.0, 0.0), 45.0, 0.001)
+
+	# Positive ground_tilt_rad means leaning into the shot (downhill ahead) —
+	# the dial angle should read lower than it does on flat ground.
+	var leaning_forward := Ballistics.tilted_angle_deg(45.0, deg_to_rad(20.0))
+	check("leaning into the shot lowers the effective angle", leaning_forward < 45.0)
+	var leaning_back := Ballistics.tilted_angle_deg(45.0, deg_to_rad(-20.0))
+	check("leaning away from the shot raises the effective angle", leaning_back > 45.0)
+
+	# The catapult's own sign convention already flips ground_tilt_rad by
+	# facing (Catapult._ground_angle = slope_at(x) * signf(scale.x)), so the
+	# same positive value must mean "leaning forward" for either facing.
+	var right_elevation := Ballistics.launch_velocity(45.0, 50.0, 1, deg_to_rad(20.0))
+	var left_elevation := Ballistics.launch_velocity(45.0, 50.0, -1, deg_to_rad(20.0))
+	check("leaning forward flattens the shot for a right-facing catapult",
+		right_elevation.y > Ballistics.launch_velocity(45.0, 50.0, 1).y)
+	check("leaning forward flattens the shot for a left-facing catapult too",
+		left_elevation.y > Ballistics.launch_velocity(45.0, 50.0, -1).y)
+
 func _test_integrator_matches_closed_form() -> void:
 	print("ballistics.simulate vs closed form")
 	# Fire over perfectly flat ground and compare the landing point with
@@ -102,18 +126,11 @@ func _test_integrator_matches_closed_form() -> void:
 # --- damage -----------------------------------------------------------------
 
 func _test_damage_falloff() -> void:
-	print("damage.at_distance")
-	check("direct hit deals max damage",
-		Damage.at_distance(0.0) == int(round(Damage.MAX_DAMAGE)))
-	check("beyond the blast radius deals nothing",
-		Damage.at_distance(Damage.BLAST_RADIUS) == 0)
-	check("well outside deals nothing",
-		Damage.at_distance(Damage.BLAST_RADIUS * 4.0) == 0)
-	check("half radius deals about half",
-		Damage.at_distance(Damage.BLAST_RADIUS * 0.5) == int(round(Damage.MAX_DAMAGE * 0.5)))
-	check("falloff is monotonic",
-		Damage.at_distance(10.0) > Damage.at_distance(50.0)
-		and Damage.at_distance(50.0) > Damage.at_distance(90.0))
+	print("damage.is_hit")
+	check("a direct hit counts", Damage.is_hit(0.0))
+	check("just inside the blast radius counts", Damage.is_hit(Damage.BLAST_RADIUS - 1.0))
+	check("exactly the blast radius does not count", not Damage.is_hit(Damage.BLAST_RADIUS))
+	check("well outside does not count", not Damage.is_hit(Damage.BLAST_RADIUS * 4.0))
 
 # --- terrain ----------------------------------------------------------------
 
@@ -202,6 +219,20 @@ func _test_crater() -> void:
 		t3.carve_crater(Vector2(x, t3.height_at(x)), 70.0)
 	check("repeated blasts stop at bedrock", t3.height_at(x) <= Terrain.MAX_SURFACE_Y + 0.01)
 
+# --- lives --------------------------------------------------------------
+
+func _test_lives() -> void:
+	print("game_state.player lives")
+	var p := GameState.Player.new("Marcus", Color.RED, 1)
+	check("starts with MAX_LIVES", p.lives == GameState.MAX_LIVES)
+	check("alive with lives remaining", p.is_alive())
+
+	p.lives -= 1
+	check("one hit leaves it standing", p.is_alive())
+
+	p.lives -= 1
+	check("a second hit is fatal", not p.is_alive())
+
 # --- turn order -------------------------------------------------------------
 
 func _test_turn_rotation() -> void:
@@ -227,12 +258,12 @@ func _test_turn_rotation() -> void:
 	gs3.add_player("A", Color.RED, 1)
 	gs3.add_player("B", Color.BLUE, -1)
 	gs3.add_player("C", Color.GREEN, -1)
-	gs3.players[1].hp = 0
+	gs3.players[1].lives = 0
 	gs3.advance_turn()
 	check("dead players are skipped", gs3.current().name == "C")
 	check("a match with two alive is not over", not gs3.is_over())
 
-	gs3.players[2].hp = 0
+	gs3.players[2].lives = 0
 	check("match ends with one standing", gs3.is_over())
 	check("the survivor wins", gs3.winner().name == "A")
 	check("advancing a finished match is refused", not gs3.advance_turn())

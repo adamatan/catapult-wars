@@ -2,8 +2,8 @@ class_name PlayerBanner
 extends Control
 
 ## One player's chip along the top of the screen: portrait coin, name plate,
-## HP and laurel. The player whose turn it is grows slightly and picks up a
-## gold glow, exactly as the active chip does in the mockups.
+## and a pip for each life left. The player whose turn it is grows slightly
+## and picks up a gold glow, exactly as the active chip does in the mockups.
 
 const BASE_SIZE := Vector2(250, 96)
 
@@ -88,13 +88,17 @@ func _draw() -> void:
 	RomanStyle.text_centred(self, RomanStyle.DISPLAY_FONT, plate_centre,
 		player.name.to_upper(), 30, ink)
 
-	# Strength below the plate, with a laurel sprig beside it.
-	var hp_at := plate_centre + Vector2(0, 34)
-	var hp_text := str(player.hp) if not dead else "FALLEN"
-	RomanStyle.text_centred(self, RomanStyle.NUMERAL_FONT, hp_at, hp_text, 26,
-		RomanStyle.PARCHMENT if not dead else RomanStyle.CRIMSON_BRIGHT)
-	if not dead:
-		RomanStyle.laurel(self, hp_at + _m(Vector2(38, 4)), 16.0, RomanStyle.GOLD, 2.4)
+	# Lives below the plate, as struck-coin pips rather than a number — with
+	# only two to lose, "FALLEN" versus "one left" reads faster as shapes than
+	# as digits, and it survives the eventual four-player match without a
+	# redesign, since it makes no assumption about MAX_LIVES beyond drawing one
+	# pip per life.
+	var lives_at := plate_centre + Vector2(0, 34)
+	if dead:
+		RomanStyle.text_centred(self, RomanStyle.NUMERAL_FONT, lives_at, "FALLEN", 26,
+			RomanStyle.CRIMSON_BRIGHT)
+	else:
+		_draw_lives(lives_at)
 
 	# Portrait coin, overlapping the plate's outer edge.
 	var coin_radius := 30.0
@@ -102,6 +106,20 @@ func _draw() -> void:
 		RomanStyle.GOLD if not dead else RomanStyle.GOLD.darkened(0.5))
 	draw_arc(coin_at, coin_radius + 3.0, 0.0, TAU, 32,
 		RomanStyle.GOLD_BRIGHT if active else RomanStyle.GOLD_DARK, 3.0)
+
+## A row of small coins centred on `at`: filled gold for a life still held,
+## dark and hollow for one already lost.
+func _draw_lives(at: Vector2) -> void:
+	var radius := 9.0
+	var spacing := 24.0
+	var total := GameState.MAX_LIVES
+	var start_x := -spacing * float(total - 1) * 0.5
+	for i in total:
+		var pip := at + Vector2(start_x + float(i) * spacing, 0)
+		var lost := i >= player.lives
+		RomanStyle.coin(self, pip, radius, RomanStyle.STONE_LIGHT if lost else RomanStyle.GOLD)
+		if lost:
+			draw_arc(pip, radius + 2.0, 0.0, TAU, 16, RomanStyle.STONE_DARK, 1.5)
 
 ## Shrink a convex-ish polygon toward its centroid, for the inner bevel.
 func _inset(poly: PackedVector2Array, amount: float) -> PackedVector2Array:

@@ -152,7 +152,8 @@ func _on_fire_pressed() -> void:
 	_projectile.wind = 0.0  # implemented in the integrator, disabled for v1
 	add_child(_projectile)
 	_projectile.launch(player.catapult.muzzle(),
-		Ballistics.launch_velocity(player.angle, player.power, player.facing))
+		Ballistics.launch_velocity(player.angle, player.power, player.facing,
+			player.catapult.ground_tilt()))
 	_projectile.impacted.connect(_on_impact)
 	_projectile.left_field.connect(_on_left_field)
 
@@ -170,9 +171,8 @@ func _on_impact(where: Vector2) -> void:
 	for player in game.players:
 		if not player.is_alive():
 			continue
-		var hurt := Damage.at_distance(where.distance_to(player.catapult.body_centre()))
-		if hurt > 0:
-			player.hp = maxi(0, player.hp - hurt)
+		if Damage.is_hit(where.distance_to(player.catapult.body_centre())):
+			player.lives = maxi(0, player.lives - 1)
 	_hud.refresh(game)
 
 	await get_tree().create_timer(RESOLVE_PAUSE).timeout

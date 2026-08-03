@@ -7,14 +7,14 @@ extends RefCounted
 ## two, but the reference mockups show four banners and turn rotation over a
 ## list costs nothing now and is a rewrite later.
 
-const MAX_HP := 100
+const MAX_LIVES := 2        ## hits a machine can take before it is out
 const MAX_STEPS := 3        ## repositioning allowance per turn, either direction
 const STEP_PIXELS := 26.0   ## ground distance covered by one step
 
 class Player extends RefCounted:
 	var name: String
 	var color: Color
-	var hp: int = MAX_HP
+	var lives: int = MAX_LIVES
 	var angle: float = 45.0    ## degrees, 0..90
 	var power: float = 60.0    ## percent, 0..100
 	var facing: int = 1        ## +1 aims right, -1 aims left
@@ -26,7 +26,7 @@ class Player extends RefCounted:
 		facing = p_facing
 
 	func is_alive() -> bool:
-		return hp > 0
+		return lives > 0
 
 var players: Array[Player] = []
 var current_index: int = 0

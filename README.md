@@ -5,9 +5,10 @@ dressed in the imperial Roman style of the mockups in `reference/`.
 
 Two commanders sit on opposite sides of a procedurally generated valley. Each
 turn you may reposition up to three steps, set elevation and force, and loose a
-stone. Blast damage falls off with distance, craters permanently reshape the
-ground, and a machine whose footing is blown away drops into the hole. Last one
-standing wins.
+stone. Two hits and a machine is out — a graze counts the same as a bullseye,
+so the only question is whether the shot lands close enough. Craters
+permanently reshape the ground, and a machine whose footing is blown away
+drops into the hole. Last one standing wins.
 
 **v1 is local hotseat, two human players, in a browser.** No AI, no netplay.
 
@@ -84,10 +85,23 @@ A few decisions worth knowing before you change anything:
 
 **Projectiles do not use `RigidBody2D`.** `src/core/ballistics.gd` integrates
 motion by hand in fixed substeps. That makes a shot fully determined by
-`(angle, power, wind)` — reproducible, unit-testable against the closed-form
-range equation, and cheap to replay as the ghost arc that lingers after each
-shot. Collision is a heightmap lookup, not a physics query, so nothing tunnels
-through thin ground at speed.
+`(angle, power, wind, ground_tilt)` — reproducible, unit-testable against the
+closed-form range equation, and cheap to replay as the ghost arc that lingers
+after each shot. Collision is a heightmap lookup, not a physics query, so
+nothing tunnels through thin ground at speed.
+
+**The dial angle is relative to the ground, not the horizon.** A catapult
+parked on a slope tilts to sit flush with it — `Catapult._ground_angle`, also
+its own `rotation` — and `Ballistics.tilted_angle_deg` subtracts that same
+signed value from the dial reading before it becomes a launch angle. Leaning
+into the shot (downhill in the direction the machine fires) lowers the
+effective angle; leaning back raises it. It is a plain subtraction rather than
+rotating a mirrored direction vector on purpose — the latter is what
+`Catapult`'s own body-tilt formula does to look right for both facings, and
+composing that a second time onto an already-mirrored aim direction does not
+cancel out evenly, so the same slope would flatten a right-facing shot and
+steepen a left-facing one. `tests/run_tests.gd` checks both facings land on
+the same answer.
 
 **Terrain is a heightmap**, one sample every ~1.9px. Craters lower samples
 inside a circle. Nothing can overhang or tunnel — that is the price, and it
@@ -96,6 +110,13 @@ buys collision that costs an array index.
 **Players live in an ordered array**, never `player_a`/`player_b`. v1 ships
 two; the mockups show four banners, and the turn rotation, banner row and win
 check already iterate.
+
+**A hit is binary, not graduated.** `Damage.is_hit` only asks whether the
+impact landed inside `BLAST_RADIUS`; distance beyond that decides nothing.
+`GameState.Player.lives` starts at `MAX_LIVES` (2) and drops by one per hit,
+so a graze and a bullseye cost a machine the same. The banner shows this as a
+pip per life rather than a number, which is also why it needs no redesign if
+`MAX_LIVES` ever changes.
 
 **The turn state machine is explicit** — `AIM → FIRING → IMPACT → TURN_END` —
 and input is accepted only in `AIM`. That is what makes the classic artillery

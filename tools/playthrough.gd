@@ -58,7 +58,7 @@ func _play_one(index: int) -> void:
 
 	var turns := 0
 	var shots := 0
-	var starting_total := _total_hp(battle)
+	var starting_total := _total_lives(battle)
 
 	while battle.state != Battlefield.State.GAME_OVER and turns < MAX_TURNS:
 		if battle.state != Battlefield.State.AIM:
@@ -92,21 +92,22 @@ func _play_one(index: int) -> void:
 			break
 		turns += 1
 
-	var ending_total := _total_hp(battle)
+	var ending_total := _total_lives(battle)
 
 	if battle.state != Battlefield.State.GAME_OVER:
 		_fail("match %d: no winner after %d turns" % [index, turns])
 	elif _winner_name.is_empty():
 		_fail("match %d: finished without emitting a winner" % index)
 	elif ending_total >= starting_total:
-		_fail("match %d: nobody took any damage" % index)
+		_fail("match %d: nobody landed a hit" % index)
 	else:
-		var loser_hp := 0
+		var loser_lives := 0
 		for p in battle.game.players:
 			if p.name != _winner_name:
-				loser_hp = p.hp
-		if loser_hp != 0:
-			_fail("match %d: winner declared while the loser still had %d hp" % [index, loser_hp])
+				loser_lives = p.lives
+		if loser_lives != 0:
+			_fail("match %d: winner declared while the loser still had %d lives"
+				% [index, loser_lives])
 		else:
 			print("  ok    match %d: %s wins after %d turns (%d shots)"
 				% [index, _winner_name, turns, shots])
@@ -117,10 +118,10 @@ func _play_one(index: int) -> void:
 func _on_match_over(name: String, _colour: Color) -> void:
 	_winner_name = name
 
-func _total_hp(battle: Battlefield) -> int:
+func _total_lives(battle: Battlefield) -> int:
 	var total := 0
 	for p in battle.game.players:
-		total += p.hp
+		total += p.lives
 	return total
 
 ## Fire roughly at the opponent, with enough scatter that shots land all over
