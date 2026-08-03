@@ -168,11 +168,32 @@ func _on_impact(where: Vector2) -> void:
 	add_child(blast)
 	_shake = 14.0
 
+	# Deliberately no exclusion of game.current() (the shooter) here: a blast
+	# that lands within Damage.BLAST_RADIUS of your own catapult injures you
+	# too. Self-injury from a too-close shot is by design, not a bug.
 	for player in game.players:
 		if not player.is_alive():
 			continue
 		if Damage.is_hit(where.distance_to(player.catapult.body_centre())):
 			player.lives = maxi(0, player.lives - 1)
+
+	# Nearby machines get rattled sideways too — a burnt wreck at zero lives
+	# is not shoved, only living catapults are.
+	for catapult in _catapults:
+		if not catapult.player.is_alive():
+			continue
+		var distance := where.distance_to(catapult.body_centre())
+		var push := Knockback.push_for(distance)
+		if push > 0.0:
+			var direction := signf(catapult.position.x - where.x)
+			if direction == 0.0:
+				direction = 1.0
+			catapult.nudge(direction * push)
+
+	# Refreshed once, after both loops: nudge() can clear the shooter's own
+	# step_offset (a self-knockback on a turn they already repositioned), so
+	# refreshing before the knockback loop would leave the HUD's step readout
+	# showing the pre-nudge count for the whole resolve pause below.
 	_hud.refresh(game)
 
 	await get_tree().create_timer(RESOLVE_PAUSE).timeout

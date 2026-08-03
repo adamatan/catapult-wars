@@ -89,13 +89,13 @@ func _draw() -> void:
 		player.name.to_upper(), 30, ink)
 
 	# Lives below the plate, as struck-coin pips rather than a number — with
-	# only two to lose, "FALLEN" versus "one left" reads faster as shapes than
+	# only a few to lose, "ASHES" versus "one left" reads faster as shapes than
 	# as digits, and it survives the eventual four-player match without a
 	# redesign, since it makes no assumption about MAX_LIVES beyond drawing one
 	# pip per life.
 	var lives_at := plate_centre + Vector2(0, 34)
 	if dead:
-		RomanStyle.text_centred(self, RomanStyle.NUMERAL_FONT, lives_at, "FALLEN", 26,
+		RomanStyle.text_centred(self, RomanStyle.NUMERAL_FONT, lives_at, "ASHES", 26,
 			RomanStyle.CRIMSON_BRIGHT)
 	else:
 		_draw_lives(lives_at)

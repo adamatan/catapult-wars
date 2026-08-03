@@ -5,10 +5,11 @@ dressed in the imperial Roman style of the mockups in `reference/`.
 
 Two commanders sit on opposite sides of a procedurally generated valley. Each
 turn you may reposition up to three steps, set elevation and force, and loose a
-stone. Two hits and a machine is out — a graze counts the same as a bullseye,
-so the only question is whether the shot lands close enough. Craters
-permanently reshape the ground, and a machine whose footing is blown away
-drops into the hole. Last one standing wins.
+stone. Three hits and a machine is out — a graze counts the same as a bullseye,
+so the only question is whether the shot lands close enough, and every hit
+short of the last one leaves it burning. Craters permanently reshape the
+ground, a nearby blast can shove a machine sideways as well as injure it, and
+one whose footing is blown away drops into the hole. Last one standing wins.
 
 **v1 is local hotseat, two human players, in a browser.** No AI, no netplay.
 
@@ -113,10 +114,29 @@ check already iterate.
 
 **A hit is binary, not graduated.** `Damage.is_hit` only asks whether the
 impact landed inside `BLAST_RADIUS`; distance beyond that decides nothing.
-`GameState.Player.lives` starts at `MAX_LIVES` (2) and drops by one per hit,
-so a graze and a bullseye cost a machine the same. The banner shows this as a
-pip per life rather than a number, which is also why it needs no redesign if
-`MAX_LIVES` ever changes.
+`BLAST_RADIUS` is deliberately wider than `Catapult.HIT_RADIUS` — the radius
+that ends a stone's flight as a "direct hit" — so a shot that lands short of
+that still costs a life, and nothing excludes the shooter from their own
+blast; firing too close to yourself hurts you the same way. `GameState.Player.lives`
+starts at `MAX_LIVES` (3) and drops by one per hit, so a graze and a bullseye
+cost a machine the same. The banner shows this as a pip per life rather than a
+number, which is also why it needs no redesign if `MAX_LIVES` ever changes;
+`Catapult`'s own fire/smoke/burnt-wreck state is keyed off the same
+`MAX_LIVES - player.lives` difference rather than a hardcoded life count, for
+the same reason.
+
+**Knockback is a second, independent radius from injury.** `src/core/knockback.gd`
+follows the same no-nodes, unit-testable pattern as `Ballistics`: `push_for(distance)`
+falls off linearly to zero at `Knockback.RADIUS` (160px, wider than
+`Damage.BLAST_RADIUS`), and `Battlefield._on_impact` calls it for every living
+catapult, shoving it away from the blast with `Catapult.nudge()`. `nudge()`
+moves `position.x` directly, then folds the result back into `base_x` and
+clears `step_offset` — the same pair `commit_position()` sets, but computed
+from wherever the catapult actually stands *this instant*, including any
+steps already taken this turn, rather than the position it started the turn
+at. A knockback that only wrote `base_x` (as `commit_position()` does, reading
+`position.x` rather than setting it) would silently discard an in-progress
+step — the bug this exact mechanism was rewritten to fix.
 
 **The turn state machine is explicit** — `AIM → FIRING → IMPACT → TURN_END` —
 and input is accepted only in `AIM`. That is what makes the classic artillery

@@ -12,6 +12,8 @@ func _init() -> void:
 	_test_ground_tilt()
 	_test_integrator_matches_closed_form()
 	_test_damage_falloff()
+	_test_knockback()
+	_test_nudge()
 	_test_terrain_generation()
 	_test_crater()
 	_test_lives()
@@ -132,6 +134,47 @@ func _test_damage_falloff() -> void:
 	check("exactly the blast radius does not count", not Damage.is_hit(Damage.BLAST_RADIUS))
 	check("well outside does not count", not Damage.is_hit(Damage.BLAST_RADIUS * 4.0))
 
+	# Short of a direct hit but still close: BLAST_RADIUS is deliberately wider
+	# than Catapult.HIT_RADIUS, so a near miss already injures.
+	check("just past a direct hit still injures",
+		Damage.is_hit(Catapult.HIT_RADIUS + 1.0))
+	check("mid-band still injures", Damage.is_hit(66.0))
+
+# --- knockback ---------------------------------------------------------------
+
+func _test_knockback() -> void:
+	print("knockback.push_for")
+	check_near("a blast right on the catapult gives full push",
+		Knockback.push_for(0.0), Knockback.MAX_PUSH, 0.001)
+	check_near("a blast at the radius gives no push",
+		Knockback.push_for(Knockback.RADIUS), 0.0, 0.001)
+	check_near("a blast halfway gives half push",
+		Knockback.push_for(Knockback.RADIUS * 0.5), Knockback.MAX_PUSH * 0.5, 0.001)
+	check_near("a blast well beyond the radius gives no push",
+		Knockback.push_for(Knockback.RADIUS * 2.0), 0.0, 0.001)
+
+## A self-knockback (blast within Knockback.RADIUS of the shooter's own
+## catapult) landing after the shooter has already spent steps this turn must
+## shove from where they actually stand, not from where the turn started, and
+## must not leave step_offset — and so the HUD's step readout — stale.
+func _test_nudge() -> void:
+	print("catapult.nudge")
+	var c := Catapult.new()
+	c.base_x = 190.0
+	c.set_step_offset(2)
+	var stepped := 190.0 + 2.0 * GameState.STEP_PIXELS
+	check_near("stepping moves position.x off base_x", c.position.x, stepped, 0.01)
+
+	var push := Knockback.push_for(40.0)
+	c.nudge(-push)
+	check_near("nudge shoves from the stepped position, not base_x",
+		c.position.x, stepped - push, 0.01)
+	check("nudge folds the new position into base_x",
+		is_equal_approx(c.base_x, c.position.x))
+	check("nudge clears step_offset so the HUD readout isn't stale",
+		c.step_offset == 0)
+	c.free()
+
 # --- terrain ----------------------------------------------------------------
 
 ## Terrain is a Node2D, so instances made outside the tree have to be freed by
@@ -231,7 +274,10 @@ func _test_lives() -> void:
 	check("one hit leaves it standing", p.is_alive())
 
 	p.lives -= 1
-	check("a second hit is fatal", not p.is_alive())
+	check("a second hit leaves it standing", p.is_alive())
+
+	p.lives -= 1
+	check("a third hit is fatal", not p.is_alive())
 
 # --- turn order -------------------------------------------------------------
 

@@ -7,7 +7,7 @@ extends RefCounted
 ## two, but the reference mockups show four banners and turn rotation over a
 ## list costs nothing now and is a rewrite later.
 
-const MAX_LIVES := 2        ## hits a machine can take before it is out
+const MAX_LIVES := 3        ## hits a machine can take before it is out
 const MAX_STEPS := 3        ## repositioning allowance per turn, either direction
 const STEP_PIXELS := 26.0   ## ground distance covered by one step
 
