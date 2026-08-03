@@ -156,8 +156,16 @@ imports the screenshots as project assets and packs them into the next export.
 
 **What has actually been run where.** The tests, playthroughs, screenshots and
 browser check all passed on Linux, where this was built. Nothing here has been
-run on Windows. macOS support in the scripts is written but the export has not
-yet completed on one — see the top of this file if it fails.
+run on Windows.
+
+On macOS the web export has been run end to end with Godot 4.7.1: it exports,
+serves, and the engine loads and executes the wasm with no `SharedArrayBuffer`
+or `crossOriginIsolated` errors, which is the no-threads claim above holding up.
+Two gaps remain there. The engine was only ever reached in a headless browser
+with no WebGL2, so it stopped at the feature check and the game itself has not
+been seen rendering. And `fetch_godot.sh` was exercised only on its
+already-installed path via `GODOT_BIN` — its download-and-rename half has never
+run on a Mac.
 
 ## Not in v1, deliberately
 
