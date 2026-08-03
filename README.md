@@ -13,19 +13,37 @@ standing wins.
 
 ## Running it
 
-```bash
-scripts/fetch_godot.sh          # Godot 4.6-stable + matching web export templates
-.godot-bin/godot --path .       # play on the desktop
-```
+The engine and its export templates must be the **same version**, or the export
+fails. That is the one rule everything below serves.
+
+**If you already have Godot** (4.7.x), point both scripts at it. `GODOT_BIN`
+skips the editor download and reads the version off your binary, so the
+templates match whatever you have:
 
 ```bash
+export GODOT_BIN=/Applications/Godot.app/Contents/MacOS/Godot   # macOS
+scripts/fetch_godot.sh          # installs matching export templates only
 scripts/build_web.sh            # export to build/web/
 python3 tools/serve.py build/web 8000
 # then open http://127.0.0.1:8000/index.html
 ```
 
-The engine and its export templates must be the **same version** — that is the
-whole reason `fetch_godot.sh` pins one and installs both.
+**If you don't**, the script fetches an editor too, into `.godot-bin/`:
+
+```bash
+scripts/fetch_godot.sh          # Godot 4.7.1-stable + matching templates
+.godot-bin/godot --path .       # play on the desktop
+```
+
+The template archive is ~1.2 GB — every platform ships in one `.tpz`, and
+there is no web-only download. Godot's own *Editor → Manage Export Templates →
+Download and Install* fetches the same file, so use whichever is faster on your
+connection.
+
+macOS and Linux are both handled; the script picks the right download and the
+right template directory (`~/Library/Application Support/Godot/` vs
+`~/.local/share/godot/`) from `uname`. Windows is not — install Godot yourself
+and set `GODOT_BIN`.
 
 ### Hosting
 
@@ -110,17 +128,18 @@ licences ship alongside them in `assets/fonts/`.
 
 ## Checks
 
+`GODOT_BIN` defaults to `.godot-bin/godot`; set it to your own binary if you
+have one.
+
 ```bash
 # logic: integrator vs closed form, damage falloff, craters, turn rotation
-.godot-bin/godot --headless --path . --script tests/run_tests.gd
+$GODOT_BIN --headless --path . --script tests/run_tests.gd
 
 # whole matches played to a winner, headlessly
-xvfb-run -a -s "-screen 0 1920x1080x24" .godot-bin/godot --path . \
-    --script tools/playthrough.gd -- 6
+$GODOT_BIN --path . --script tools/playthrough.gd -- 6
 
 # screenshots of every screen, for eyeballing a change
-xvfb-run -a -s "-screen 0 1920x1080x24" .godot-bin/godot --path . \
-    --resolution 1920x1080 --script tools/shoot.gd -- all build/shots
+$GODOT_BIN --path . --resolution 1920x1080 --script tools/shoot.gd -- all build/shots
 
 # the export actually boots and plays in a real browser
 scripts/build_web.sh
@@ -128,8 +147,17 @@ python3 tools/serve.py build/web 8000 &
 node tools/browser_check.mjs
 ```
 
+The last two need a real window. On a headless Linux box, prefix them with
+`xvfb-run -a -s "-screen 0 1920x1080x24"`; on macOS they open a window and run
+as-is.
+
 `build/` is gitignored and holds a `.gdignore`, without which the editor
 imports the screenshots as project assets and packs them into the next export.
+
+**What has actually been run where.** The tests, playthroughs, screenshots and
+browser check all passed on Linux, where this was built. Nothing here has been
+run on Windows. macOS support in the scripts is written but the export has not
+yet completed on one — see the top of this file if it fails.
 
 ## Not in v1, deliberately
 
