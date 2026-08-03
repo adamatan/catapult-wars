@@ -1,0 +1,70 @@
+[
+  {
+    "slug": "field_01",
+    "title": "Alpine Pass",
+    "texture": "res://assets/backdrops/field_01.jpg",
+    "sky_color": [
+      126,
+      131,
+      139
+    ],
+    "haze_color": [
+      113,
+      121,
+      133
+    ],
+    "rock_color": "#3c444d",
+    "crust_color": "#dfe6ec"
+  },
+  {
+    "slug": "field_02",
+    "title": "Hilltop Siege",
+    "texture": "res://assets/backdrops/field_02.jpg",
+    "sky_color": [
+      154,
+      124,
+      100
+    ],
+    "haze_color": [
+      145,
+      110,
+      78
+    ],
+    "rock_color": "#5c4126",
+    "crust_color": "#c1955c"
+  },
+  {
+    "slug": "field_03",
+    "title": "Coastal City",
+    "texture": "res://assets/backdrops/field_03.jpg",
+    "sky_color": [
+      152,
+      149,
+      144
+    ],
+    "haze_color": [
+      148,
+      128,
+      109
+    ],
+    "rock_color": "#5b5342",
+    "crust_color": "#9aa06a"
+  },
+  {
+    "slug": "field_04",
+    "title": "Frontier Wall",
+    "texture": "res://assets/backdrops/field_04.jpg",
+    "sky_color": [
+      151,
+      144,
+      136
+    ],
+    "haze_color": [
+      113,
+      106,
+      93
+    ],
+    "rock_color": "#38402c",
+    "crust_color": "#7d8a4e"
+  }
+]

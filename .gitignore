@@ -1,1 +1,11 @@
 .DS_Store
+
+# Godot editor cache / import artifacts
+.godot/
+*.translation
+
+# Locally fetched engine (see scripts/fetch_godot.sh)
+.godot-bin/
+
+# Export output
+build/
