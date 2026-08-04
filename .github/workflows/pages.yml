@@ -104,16 +104,14 @@ jobs:
           done
 
       - name: Prove it boots in a real browser
-        # browser_check.mjs falls back to the runner's global playwright, which
-        # looks for browsers in /opt/pw-browsers no matter what the environment
-        # says. Rather than fight over which module wins resolution, install the
-        # browser into the directory the launcher already reads — it just needs
-        # to be writable first.
-        env:
-          PLAYWRIGHT_BROWSERS_PATH: /opt/pw-browsers
         run: |
-          sudo mkdir -p /opt/pw-browsers
-          sudo chown -R "$(id -u):$(id -g)" /opt/pw-browsers
+          # The runner image presets PLAYWRIGHT_BROWSERS_PATH at /opt/pw-browsers
+          # for its own preinstalled copy, and installing into it does not help:
+          # the download lands in chromium-<rev>/ while the launcher looks for a
+          # plain chromium/. Clearing the variable puts install and launch back
+          # on Playwright's own default, where they agree. Both run in this one
+          # shell, so unsetting it here covers both.
+          unset PLAYWRIGHT_BROWSERS_PATH
           npm install --no-save playwright
           npx playwright install --with-deps chromium
           python3 tools/serve.py build/web 8000 &
