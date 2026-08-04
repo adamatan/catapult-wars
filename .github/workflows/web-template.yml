@@ -51,6 +51,7 @@ jobs:
       - name: Build
         run: |
           scons platform=web target=template_release production=yes \
+            threads=no \
             disable_3d=yes \
             disable_physics_2d=yes \
             disable_physics_3d=yes \
@@ -109,9 +110,12 @@ jobs:
         run: |
           version="${{ inputs.godot_version }}"
           tag="web-template-${version%-stable}-slim"
-          cp "${{ steps.template.outputs.path }}" web_release.zip
+          # threads=no makes this the "nothreads" variant, and that is the name
+          # Godot looks for when the preset has thread support off. Naming it
+          # web_release.zip gets it silently ignored.
+          cp "${{ steps.template.outputs.path }}" web_nothreads_release.zip
           gh release view "$tag" >/dev/null 2>&1 \
             || gh release create "$tag" \
                  --title "Slim web template $version" \
                  --notes "Godot $version web template built without 3D, XR, navigation, networking, video, and the advanced text server. Consumed by .github/workflows/pages.yml."
-          gh release upload "$tag" web_release.zip --clobber
+          gh release upload "$tag" web_nothreads_release.zip --clobber

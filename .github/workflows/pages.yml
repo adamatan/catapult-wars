@@ -55,9 +55,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if gh release download "$SLIM_TEMPLATE_TAG" \
-               --pattern web_release.zip --dir /tmp/slim 2>/dev/null; then
+               --pattern web_nothreads_release.zip --dir /tmp/slim 2>/dev/null; then
             echo "found=true" >> "$GITHUB_OUTPUT"
-            echo "slim template: $(du -h /tmp/slim/web_release.zip | cut -f1)"
+            echo "slim template: $(du -h /tmp/slim/web_nothreads_release.zip | cut -f1)"
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
             echo "no slim template published yet — falling back to the official one"
@@ -82,7 +82,11 @@ jobs:
         run: |
           dir="$HOME/.local/share/godot/export_templates/${GODOT_VERSION/-/.}"
           mkdir -p "$dir"
-          cp /tmp/slim/web_release.zip "$dir/web_release.zip"
+          cp /tmp/slim/web_nothreads_release.zip "$dir/web_nothreads_release.zip"
+          # Godot refuses the whole preset if either half of the variant is
+          # missing, even for --export-release. The debug template is never
+          # used here, so the release build stands in for it.
+          cp /tmp/slim/web_nothreads_release.zip "$dir/web_nothreads_debug.zip"
           echo "${GODOT_VERSION/-/.}" > "$dir/version.txt"
 
       - name: Export
