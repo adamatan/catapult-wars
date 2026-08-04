@@ -1,0 +1,117 @@
+name: Build the slim web template
+
+# The stock Godot web template is 39.5 MB of engine for 2 MB of game, because it
+# carries 3D, XR, navigation, networking, video, and the ICU tables of the
+# advanced text server — none of which this game touches. Rebuilding it from
+# source without them is the only way to move the number that transport
+# compression cannot.
+#
+# Run by hand, not on push: it takes the better part of an hour and the output
+# only changes when the engine version or the flags below do. pages.yml picks
+# the result up from the release asset.
+
+on:
+  workflow_dispatch:
+    inputs:
+      godot_version:
+        description: Godot version to build (must match the editor pages.yml uses)
+        default: 4.7.1-stable
+
+permissions:
+  contents: write
+
+env:
+  # Godot pins the emscripten it is built against. A mismatch does not fail the
+  # build; it produces a wasm that misbehaves at runtime in ways that read like
+  # game bugs. This is the version from Godot's own web_builds.yml at 4.7.1.
+  EM_VERSION: 4.0.11
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out Godot
+        uses: actions/checkout@v4
+        with:
+          repository: godotengine/godot
+          ref: ${{ inputs.godot_version }}
+
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: ${{ env.EM_VERSION }}
+          actions-cache-folder: emsdk-cache
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - run: python -m pip install scons
+
+      - name: Build
+        run: |
+          scons platform=web target=template_release production=yes \
+            disable_3d=yes \
+            disable_physics_2d=yes \
+            disable_physics_3d=yes \
+            disable_navigation_2d=yes \
+            disable_navigation_3d=yes \
+            disable_xr=yes \
+            disable_advanced_gui=yes \
+            deprecated=no \
+            minizip=no \
+            module_text_server_adv_enabled=no \
+            module_text_server_fb_enabled=yes \
+            module_openxr_enabled=no \
+            module_webxr_enabled=no \
+            module_gridmap_enabled=no \
+            module_csg_enabled=no \
+            module_multiplayer_enabled=no \
+            module_webrtc_enabled=no \
+            module_websocket_enabled=no \
+            module_enet_enabled=no \
+            module_upnp_enabled=no \
+            module_mbedtls_enabled=no \
+            module_theora_enabled=no \
+            module_vorbis_enabled=no \
+            module_ogg_enabled=no \
+            module_lightmapper_rd_enabled=no \
+            module_raycast_enabled=no \
+            module_xatlas_unwrap_enabled=no \
+            module_meshoptimizer_enabled=no \
+            module_camera_enabled=no \
+            module_dds_enabled=no \
+            module_hdr_enabled=no \
+            module_tga_enabled=no \
+            module_bmp_enabled=no \
+            module_ktx_enabled=no \
+            module_astcenc_enabled=no \
+            module_betsy_enabled=no \
+            module_etcpak_enabled=no
+        # Kept deliberately: jpg (backdrops), svg and thorvg (the icon), webp
+        # (Godot's own imported-texture container), freetype (the two fonts).
+
+      - name: Find and measure the template
+        id: template
+        run: |
+          zip="$(find bin -name 'godot.web.template_release*.zip' | head -1)"
+          test -n "$zip" || { echo "no template produced"; ls -la bin; exit 1; }
+          echo "path=$zip" >> "$GITHUB_OUTPUT"
+          unzip -o "$zip" -d /tmp/unpacked
+          wasm="$(find /tmp/unpacked -name '*.wasm' | head -1)"
+          printf 'wasm raw  %s\n' "$(du -h "$wasm" | cut -f1)"
+          printf 'wasm gzip %s KB\n' "$(( $(gzip -9 -c "$wasm" | wc -c) / 1024 ))"
+
+      - name: Publish it as a release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          version="${{ inputs.godot_version }}"
+          tag="web-template-${version%-stable}-slim"
+          cp "${{ steps.template.outputs.path }}" web_release.zip
+          gh release view "$tag" >/dev/null 2>&1 \
+            || gh release create "$tag" \
+                 --title "Slim web template $version" \
+                 --notes "Godot $version web template built without 3D, XR, navigation, networking, video, and the advanced text server. Consumed by .github/workflows/pages.yml."
+          gh release upload "$tag" web_release.zip --clobber

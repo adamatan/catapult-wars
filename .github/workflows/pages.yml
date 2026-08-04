@@ -1,0 +1,125 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time, and a superseded one is not worth finishing.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7.1-stable
+  # Built by web-template.yml. Until it has been run once this is absent and the
+  # build falls back to the official template, which works but is four times the
+  # size over the wire.
+  SLIM_TEMPLATE_TAG: web-template-4.7.1-slim
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore the Godot editor
+        id: editor-cache
+        uses: actions/cache@v4
+        with:
+          path: .godot-bin
+          key: godot-editor-${{ env.GODOT_VERSION }}-linux
+
+      - name: Fetch the Godot editor
+        if: steps.editor-cache.outputs.cache-hit != 'true'
+        run: scripts/fetch_godot.sh --editor-only
+
+      - name: Logic tests
+        run: .godot-bin/godot --headless --path . --script tests/run_tests.gd
+
+      # Try the slim template first. It is a normal release asset, so this is a
+      # 20 MB download rather than the 1.2 GB official archive.
+      - name: Look for a slim web template
+        id: slim
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release download "$SLIM_TEMPLATE_TAG" \
+               --pattern web_release.zip --dir /tmp/slim 2>/dev/null; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "slim template: $(du -h /tmp/slim/web_release.zip | cut -f1)"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "no slim template published yet — falling back to the official one"
+          fi
+
+      # Skipped entirely when a slim template exists, which also keeps the slim
+      # build from being saved under the official template's cache key.
+      - name: Restore the official export templates
+        if: steps.slim.outputs.found != 'true'
+        id: template-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates
+          key: godot-templates-web-${{ env.GODOT_VERSION }}
+
+      - name: Fetch the official export templates
+        if: steps.slim.outputs.found != 'true' && steps.template-cache.outputs.cache-hit != 'true'
+        run: scripts/fetch_godot.sh --templates-only --web-only
+
+      - name: Install the slim web template
+        if: steps.slim.outputs.found == 'true'
+        run: |
+          dir="$HOME/.local/share/godot/export_templates/${GODOT_VERSION/-/.}"
+          mkdir -p "$dir"
+          cp /tmp/slim/web_release.zip "$dir/web_release.zip"
+          echo "${GODOT_VERSION/-/.}" > "$dir/version.txt"
+
+      - name: Export
+        run: scripts/build_web.sh
+
+      - name: Report what will be shipped
+        run: |
+          for f in build/web/index.wasm build/web/index.pck; do
+            raw=$(wc -c < "$f")
+            gz=$(gzip -9 -c "$f" | wc -c)
+            printf '%s  raw %4d MB  gzip %4d MB\n' \
+              "$(basename "$f")" $((raw / 1048576)) $((gz / 1048576))
+          done
+
+      - name: Prove it boots in a real browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+          python3 tools/serve.py build/web 8000 &
+          for _ in $(seq 30); do
+            curl -sf -o /dev/null http://127.0.0.1:8000/index.html && break
+            sleep 1
+          done
+          node tools/browser_check.mjs
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-check-screenshots
+          path: build/shots/web
+          if-no-files-found: ignore
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
