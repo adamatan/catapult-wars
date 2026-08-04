@@ -39,8 +39,12 @@ const problems = [];
 async function main() {
   await mkdir(OUT_DIR, { recursive: true });
 
+  // Left unset, Playwright launches the browser it installed itself, which is
+  // the right answer nearly everywhere. CHROMIUM_PATH is for the machine where
+  // it is not — this used to be a hardcoded /opt/pw-browsers/chromium, which
+  // worked on exactly one box.
   const browser = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium',
+    ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
     args: [
       '--use-gl=angle',
       '--use-angle=swiftshader',

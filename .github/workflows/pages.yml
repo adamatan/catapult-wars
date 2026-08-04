@@ -105,12 +105,9 @@ jobs:
 
       - name: Prove it boots in a real browser
         run: |
-          # The runner image presets PLAYWRIGHT_BROWSERS_PATH at /opt/pw-browsers
-          # for its own preinstalled copy, and installing into it does not help:
-          # the download lands in chromium-<rev>/ while the launcher looks for a
-          # plain chromium/. Clearing the variable puts install and launch back
-          # on Playwright's own default, where they agree. Both run in this one
-          # shell, so unsetting it here covers both.
+          # The runner image presets PLAYWRIGHT_BROWSERS_PATH for its own
+          # preinstalled copy. Clearing it puts install and launch back on
+          # Playwright's own default, where they agree.
           unset PLAYWRIGHT_BROWSERS_PATH
           npm install --no-save playwright
           npx playwright install --with-deps chromium
