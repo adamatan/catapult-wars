@@ -70,27 +70,37 @@ stream it. `tools/serve.py` sets that mapping; most real hosts already do.
 
 ### Why the download is what it is
 
-Measured on the 4.7.1 export, official template:
-
-| | raw | gzip |
-|---|---|---|
-| `index.wasm` | 39.5 MB | 9.8 MB |
-| `index.pck` — the entire game | 2.0 MB | 1.9 MB |
-| everything else | 0.3 MB | |
-
-The game is 2 MB. The rest is engine, which is why trimming art would buy
-nothing. Two things move the number instead:
-
-**Transport compression.** GitHub Pages gzips wasm on the fly, so the 39.5 MB
-is ~9.8 MB over the wire. Worth re-checking if the host ever changes:
+A first visit costs **7.8 MB**. Measured on the live site, not estimated:
 
 ```bash
 curl -sI -H 'Accept-Encoding: gzip' https://adamatan.github.io/catapult-wars/index.wasm
 ```
 
-The `.pck` is already compressed internally and barely responds to gzip, but at
-2 MB it does not matter. Note that Cloudflare Pages caps files at 25 MB, so it
-cannot host the official-template build at all.
+|  | stock engine | slim engine | on the wire |
+|---|---|---|---|
+| `index.wasm` | 39.5 MB | 22.5 MB | **5.9 MB** |
+| `index.pck` — the entire game | 2.0 MB | 2.0 MB | **1.9 MB** |
+| everything else | 0.3 MB | 0.3 MB | |
+
+The game is 2 MB of that. Everything else is engine, which is why trimming art
+would buy nothing — the four backdrops and two fonts come to 668 KB. Three
+things move the number instead, and all three are in effect:
+
+**A smaller engine**, built by `.github/workflows/web-template.yml` — see below.
+39.5 MB to 22.5 MB.
+
+**Transport compression.** GitHub Pages gzips both `.wasm` and `.pck` on the
+fly, which is most of the remaining factor of four. Re-check it with the curl
+above if the host ever changes: no static host can be told to compress, so if
+`content-encoding: gzip` disappears the answer is a different host, not a
+config change. Cloudflare Pages is not that host — it caps files at 25 MB, and
+even the slim wasm is 22.5 MB uncompressed.
+
+**A service worker.** The export is a PWA, so a second visit costs nothing and
+works offline. The cost is the usual one: after a deploy, a returning player
+gets the previous build until the worker updates, which takes one reload.
+It deliberately does *not* inject COOP/COEP headers — with threads off they buy
+nothing, and adding them would give up the run-anywhere property above.
 
 **A smaller engine.** `.github/workflows/web-template.yml` rebuilds Godot
 without 3D, physics, XR, navigation, networking, video, and the advanced text
@@ -235,21 +245,26 @@ as-is.
 imports the screenshots as project assets and packs them into the next export.
 
 **What has actually been run where.** The tests, playthroughs, screenshots and
-browser check all passed on Linux, where this was built. Nothing here has been
-run on Windows.
+browser check all passed on Linux, where this was built; the tests, export and
+browser check now run there on every push.
 
 On macOS the web export has been run end to end with Godot 4.7.1, repeatedly,
 across several feature rounds: it exports, serves, and the engine loads and
 executes the wasm with no `SharedArrayBuffer` or `crossOriginIsolated` errors,
 which is the no-threads claim above holding up. The windowed engine itself has
 been seen rendering extensively — `tools/shoot.gd` screenshots reviewed by hand
-after every round, including all four catapult damage tiers. Two gaps remain.
-The wasm build specifically has only ever been reached in a headless browser
-with no WebGL2, so it stops at that feature check there — nobody has yet loaded
-the actual web export in a real, WebGL2-capable browser to confirm gameplay
-renders identically to the windowed build. And `fetch_godot.sh` was exercised
-only on its already-installed path via `GODOT_BIN` — its download-and-rename
-half has never run on a Mac.
+after every round, including all four catapult damage tiers.
+
+The WebGL2 gap is now closed. `browser_check.mjs` runs on every deploy against
+a WebGL2-capable Chromium, drives the export from title screen to a resolved
+shot, and uploads what it saw as a run artifact; those screenshots have been
+compared by hand against the windowed build and match. It is a real gate, not
+decoration — it is what caught `Color8` disappearing from the slim engine, a
+failure the logic tests cannot see because they never load a screen.
+
+Two gaps remain. `fetch_godot.sh` was exercised on macOS only via `GODOT_BIN`;
+its download-and-rename half has run on Linux, in CI, but never on a Mac. And
+nothing here has been run on Windows.
 
 ## Not in v1, deliberately
 
