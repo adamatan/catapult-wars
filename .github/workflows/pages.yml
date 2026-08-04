@@ -39,6 +39,11 @@ jobs:
         if: steps.editor-cache.outputs.cache-hit != 'true'
         run: scripts/fetch_godot.sh --editor-only
 
+      # A fresh checkout has no .godot/ cache, so no class_name is registered and
+      # the tests fail to parse before they run a single check.
+      - name: Import the project
+        run: .godot-bin/godot --headless --path . --import || true
+
       - name: Logic tests
         run: .godot-bin/godot --headless --path . --script tests/run_tests.gd
 
