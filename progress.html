@@ -1,0 +1,1062 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Roman Catapults — Progress</title>
+<style>
+  :root {
+    --gold: #c8a34a;
+    --gold-bright: #f0d998;
+    --gold-dark: #7d6222;
+    --crimson: #8f1f22;
+    --crimson-bright: #c8353a;
+    --stone: #2a2622;
+    --stone-light: #3d3830;
+    --stone-dark: #141210;
+    --parchment: #ece0c4;
+    --ink: #1a1613;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2.5rem 1.5rem 4rem;
+    background: var(--stone) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Crect width='6' height='6' fill='%232a2622'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23141210' opacity='0.4'/%3E%3C/svg%3E");
+    color: var(--parchment);
+    font-family: Georgia, "Times New Roman", serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 {
+    font-size: 2.2rem;
+    margin: 0 0 0.3rem;
+    color: var(--gold-bright);
+    letter-spacing: 0.03em;
+    text-shadow: 0 2px 0 var(--stone-dark);
+  }
+  .subtitle {
+    color: var(--parchment);
+    opacity: 0.75;
+    font-style: italic;
+    margin: 0 0 2rem;
+    font-size: 0.95rem;
+  }
+  h2 {
+    color: var(--gold);
+    border-bottom: 2px solid var(--gold-dark);
+    padding-bottom: 0.35rem;
+    margin-top: 2.5rem;
+    letter-spacing: 0.04em;
+    font-size: 1.3rem;
+  }
+  .req {
+    background: var(--stone-light);
+    border: 1px solid var(--gold-dark);
+    border-left: 5px solid var(--gold);
+    border-radius: 4px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 0.9rem;
+  }
+  .req-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .req-title {
+    font-weight: bold;
+    color: var(--parchment);
+    font-size: 1.02rem;
+  }
+  .req-num {
+    color: var(--gold);
+    margin-right: 0.4rem;
+  }
+  .badge {
+    display: inline-block;
+    font-family: Verdana, sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .badge.planned {
+    background: var(--stone-dark);
+    color: var(--gold-bright);
+    border: 1px solid var(--gold-dark);
+  }
+  .req-note {
+    margin: 0.5rem 0 0;
+    font-size: 0.92rem;
+    color: var(--parchment);
+    opacity: 0.9;
+  }
+  .req-note b { color: var(--gold-bright); font-weight: normal; font-style: italic; }
+  table.team {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--stone-light);
+    border: 1px solid var(--gold-dark);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  table.team th, table.team td {
+    text-align: left;
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid var(--stone-dark);
+    font-size: 0.92rem;
+    vertical-align: top;
+  }
+  table.team th {
+    background: var(--stone-dark);
+    color: var(--gold);
+    font-weight: normal;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+  table.team tr:last-child td { border-bottom: none; }
+  .role { color: var(--gold-bright); font-weight: bold; }
+  .empty-box {
+    background: var(--stone-light);
+    border: 1px dashed var(--gold-dark);
+    border-radius: 4px;
+    padding: 1.2rem;
+    color: var(--parchment);
+    opacity: 0.6;
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gold-dark);
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+  @media (prefers-color-scheme: light) {
+    /* This dashboard commits to the game's own dark stone palette in both
+       modes on purpose — it is styled to match the game, not the viewer. */
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Roman Catapults — Build Progress</h1>
+  <p class="subtitle">
+    A local progress dashboard for this working session. This file is not
+    tracked by git and exists only on this machine — it is a status board
+    for the team, not part of the game.
+  </p>
+
+  <h2>Requirements</h2>
+
+  <div class="req">
+    <div class="req-head">
+      <span class="req-title"><span class="req-num">1.</span>Realistic terrain and catapults</span>
+      <span class="badge planned">planned</span>
+    </div>
+    <p class="req-note">
+      Close the stylistic gap between the photographic backdrop plates and the
+      flat procedural terrain/catapult drawn in front of them — richer
+      shading, texture, directional golden-hour light, weathering. All within
+      <b>_draw()</b>, no new asset pipeline.
+    </p>
+  </div>
+
+  <div class="req">
+    <div class="req-head">
+      <span class="req-title"><span class="req-num">2.</span>Three lives per player</span>
+      <span class="badge planned">planned</span>
+    </div>
+    <p class="req-note">
+      <b>GameState.MAX_LIVES</b> goes from 2 to 3. The banner's pip row and the
+      turn logic already read this constant rather than hardcoding two, so the
+      change is mostly the constant itself plus the tests that assumed two.
+    </p>
+  </div>
+
+  <div class="req">
+    <div class="req-head">
+      <span class="req-title"><span class="req-num">3.</span>Terrain can knock a catapult sideways</span>
+      <span class="badge planned">planned</span>
+    </div>
+    <p class="req-note">
+      New pure function <b>src/core/knockback.gd</b>: a blast within
+      <b>RADIUS = 160px</b> shoves a catapult sideways, away from the impact,
+      by up to <b>MAX_PUSH = 60px</b> at zero distance, falling off linearly
+      to nothing at the radius edge. Applied to <i>every</i> living catapult
+      caught in range (a burnt wreck at zero lives does not get shoved), via a
+      new <b>Catapult.nudge()</b> method, clamped to the same field bounds
+      repositioning already uses.
+    </p>
+  </div>
+
+  <div class="req">
+    <div class="req-head">
+      <span class="req-title"><span class="req-num">4.</span>A too-close blast injures you</span>
+      <span class="badge planned">planned</span>
+    </div>
+    <p class="req-note">
+      Already true in the existing code, just unproven: <b>Damage.BLAST_RADIUS</b>
+      (96px) is deliberately wider than <b>Catapult.HIT_RADIUS</b> (36px, the
+      radius that ends a shot's flight as a "direct hit"), so a near miss
+      already costs a life — and the damage loop in
+      <b>Battlefield._on_impact</b> already does not exclude the shooter's own
+      catapult, so standing too close to your own blast already hurts you.
+      The work here is to document that intent in code and add the tests that
+      pin it down, not to invent a second radius.
+    </p>
+  </div>
+
+  <div class="req">
+    <div class="req-head">
+      <span class="req-title"><span class="req-num">5.</span>Remove "Fallen"</span>
+      <span class="badge planned">planned</span>
+    </div>
+    <p class="req-note">
+      Replaced everywhere with <b>ASHES</b> — short, matches the burnt-wreck
+      ending from requirement 6, and sits at roughly the same width as
+      "FALLEN" in the banner's death label.
+    </p>
+  </div>
+
+  <div class="req">
+    <div class="req-head">
+      <span class="req-title"><span class="req-num">6.</span>Fire, smoke, and a burnt wreck</span>
+      <span class="badge planned">planned</span>
+    </div>
+    <p class="req-note">
+      Keyed off lives lost against <b>MAX_LIVES</b>, not a literal life count,
+      so it stays correct if the life total ever changes again: <b>0 lost</b> —
+      pristine. <b>1 lost</b> — smoke plus small flame licks (this is the
+      "injured" state requirement 6 asks for, and it must show actual flame,
+      not smoke alone). <b>2 lost</b> (one life from destroyed) — heavier fire
+      and smoke. <b>0 lives left</b> — burnt wreck: charred, darkened colours,
+      the "FALLEN" label replaced by <b>ASHES</b>.
+    </p>
+  </div>
+
+  <h2>Team</h2>
+  <table class="team">
+    <tr><th>Role</th><th>Owns</th><th>Files</th></tr>
+    <tr>
+      <td class="role">Designer</td>
+      <td>Requirement 1 in full, plus the visual half of requirement 6 (fire /
+        smoke / burnt states on the catapult).</td>
+      <td>src/battle/terrain.gd (full); src/battle/catapult.gd — colour
+        constants, <code>_draw()</code>, <code>_draw_wheel()</code>,
+        <code>_draw_arm()</code>, and any new small private draw helpers only.</td>
+    </tr>
+    <tr>
+      <td class="role">Developer 1 <span style="opacity:.6">(phase 1, parallel with designer)</span></td>
+      <td>Requirement 2 (three lives), requirement 5 (terminology), and
+        proving requirement 4 with tests and comments; updates the tests that
+        assumed two lives.</td>
+      <td>src/core/game_state.gd; src/core/damage.gd; src/battle/battlefield.gd
+        (comment only, no logic change); src/hud/player_banner.gd;
+        tests/run_tests.gd; verifies tools/playthrough.gd still passes.</td>
+    </tr>
+    <tr>
+      <td class="role">Developer <span style="opacity:.6">(phase 2, after phase 1 lands)</span></td>
+      <td>Requirement 3: the pure knockback function, its unit test, and
+        wiring it into impact resolution.</td>
+      <td>src/core/knockback.gd (new); tests/run_tests.gd; src/battle/battlefield.gd;
+        src/battle/catapult.gd — new <code>nudge()</code> method only, nothing
+        the designer touched.</td>
+    </tr>
+  </table>
+
+  <h2>Build log</h2>
+  <!-- Later steps append entries here as work lands: what changed, which
+       commands were run to check it, and the result. -->
+  <div id="build-log">
+    <div class="req">
+      <div class="req-head">
+        <span class="req-title">Developer 1 (phase 1) &mdash; requirements 2, 4, 5</span>
+      </div>
+      <p class="req-note">
+        <b>Requirement 2:</b> <code>GameState.MAX_LIVES</code> raised from 2 to
+        3 in <code>src/core/game_state.gd</code>. No other change needed there
+        &mdash; <code>is_alive()</code>, <code>living()</code>,
+        <code>is_over()</code> and the banner's pip row were already generic
+        over the life count.
+      </p>
+      <p class="req-note">
+        <b>Requirement 4:</b> confirmed the existing behaviour rather than
+        adding a second radius. Added a doc comment on
+        <code>Damage.BLAST_RADIUS</code> in <code>src/core/damage.gd</code>
+        naming it as the sole injury threshold and noting it is deliberately
+        wider than <code>Catapult.HIT_RADIUS</code> (36px, which only ends a
+        projectile's flight and plays no role in <code>is_hit</code>). Added a
+        comment in <code>Battlefield._on_impact</code> next to the damage loop
+        stating that the shooter's own catapult is intentionally not excluded.
+        No new radius, no graduated damage &mdash; a hit stays binary.
+      </p>
+      <p class="req-note">
+        <b>Requirement 5:</b> re-grepped <code>src/</code> for
+        &quot;fallen&quot;/&quot;FALLEN&quot; &mdash;
+        <code>src/hud/player_banner.gd</code> was confirmed as the only hit.
+        Replaced the death label with <b>ASHES</b>, same font
+        (<code>NUMERAL_FONT</code>), size (26pt) and colour
+        (<code>CRIMSON_BRIGHT</code>) as before &mdash; a pure text swap.
+        Also fixed a now-stale comment nearby that said &quot;only two to
+        lose&quot;.
+      </p>
+      <p class="req-note">
+        <b>Tests:</b> <code>tests/run_tests.gd</code> <code>_test_lives()</code>
+        now checks three decrements (&quot;a second hit leaves it standing&quot;,
+        &quot;a third hit is fatal&quot;) instead of the old two-hit assumption.
+        Added two cases to <code>damage.is_hit</code> proving requirement 4:
+        <code>Damage.is_hit(Catapult.HIT_RADIUS + 1.0)</code> is true (just past
+        a direct hit still injures) and <code>Damage.is_hit(66.0)</code> is
+        true (mid-band). Full suite: 61/61 checks pass.
+      </p>
+      <p class="req-note">
+        <b>Not touched, flagged for the orchestrator:</b> <code>README.md</code>
+        still says &quot;Two hits and a machine is out&quot; (line 8, in the
+        intro paragraph) and &quot;<code>lives</code> starts at
+        <code>MAX_LIVES</code> (2)&quot; (line 116, under &quot;A hit is
+        binary, not graduated&quot;). Both are now stale at MAX_LIVES=3.
+        README was not in this phase's owned file list, so left as-is for a
+        follow-up edit.
+      </p>
+      <p class="req-note">
+        <b>Verification:</b>
+        <code>$GODOT_BIN --headless --path . --script tests/run_tests.gd</code>
+        &mdash; PASS, 61/61 checks, exit 0.
+        <code>$GODOT_BIN --path . --script tools/playthrough.gd -- 12</code>
+        (real window) &mdash; PASS, 12/12 matches, turns per match ranged
+        5&ndash;25, nowhere near the 400-turn cap, so <code>MAX_TURNS</code>
+        was left unchanged.
+        <code>$GODOT_BIN --path . --resolution 1920x1080 --script
+        tools/shoot.gd -- battle build/shots</code> &mdash; screenshot read
+        back and cropped/zoomed on both banners: the three-pip row renders
+        correctly, evenly spaced, well inside the plate, no clipping on
+        either the active (scaled) or inactive chip. &quot;ASHES&quot; was
+        verified by inspection rather than a screenshot &mdash;
+        <code>tools/shoot.gd</code>'s <code>victory</code> shot renders the
+        separate victory screen (<code>src/ui/</code>), not the battle HUD
+        banner row, so a dead player's banner is not reachable through the
+        existing harness (and <code>shoot.gd</code> is outside this phase's
+        owned files). The swap keeps the exact same font
+        (<code>RomanStyle.NUMERAL_FONT</code>), size (26pt) and colour
+        (<code>RomanStyle.CRIMSON_BRIGHT</code>) that &quot;FALLEN&quot; used,
+        and &quot;ASHES&quot; (5 chars) is no wider than &quot;FALLEN&quot;
+        (6 chars) in a centred string, so no layout risk. A post-edit grep for
+        &quot;fallen&quot;/&quot;FALLEN&quot; across <code>src/</code> now
+        returns nothing, confirming the swap is complete, and a grep for
+        <code>MAX_LIVES</code> across <code>src/</code>, <code>tools/</code>,
+        <code>tests/</code> turned up no other file assuming a fixed life
+        count (<code>src/hud/hud.gd</code> in particular does not reference
+        lives or pips independently of <code>player_banner.gd</code>).
+      </p>
+    </div>
+
+    <div class="req">
+      <div class="req-head">
+        <span class="req-title">Designer &mdash; requirement 1, and the visual half of requirement 6</span>
+      </div>
+      <p class="req-note">
+        <b>Terrain (requirement 1):</b> <code>src/battle/terrain.gd</code>
+        <code>_draw()</code> now layers four wobbling strata bands (up from
+        two &mdash; each band jitters by the same deterministic offset on its
+        top and bottom edge, so its thickness holds but it reads as uneven
+        sediment rather than parallel cartoon stripes), soft weathering
+        blotches sunk into the rock, short jagged cracks reaching down from
+        the crust seam, and scattered rubble/debris silhouettes sitting on
+        top of the crust. All of it is deterministic noise keyed off column
+        index (a small Thomas Wang integer hash,
+        <code>Terrain._hash01()</code>), so nothing re-rolls or jitters
+        between redraws &mdash; a crater carving a new hole does not make the
+        rubble elsewhere on the field dance. A new
+        <code>Terrain.LIGHT_DIR</code> constant (upper-left toward
+        lower-right, matching the low golden-hour sun in the reference
+        paintings) drives a per-segment rim-light/shadow overlay along the
+        crust edge, grouped into contiguous runs rather than one draw call
+        per column. <b>Every new colour is <code>_rock_color</code> or
+        <code>_crust_color</code> run through <code>lightened()</code> /
+        <code>darkened()</code> / <code>lerp()</code> &mdash; nothing is a
+        hardcoded warm tone</b>, so the golden fields stay golden and the
+        Alpine field's cold blue-grey stays cold; verified directly (see
+        below), not assumed.
+      </p>
+      <p class="req-note">
+        <b>Catapult (requirement 1):</b> <code>src/battle/catapult.gd</code>
+        gained a working-palette pattern (<code>_p_wood</code>,
+        <code>_p_iron</code>, etc., instance fields recomputed once at the
+        top of <code>_draw()</code> and read by it, <code>_draw_wheel()</code>
+        and <code>_draw_arm()</code>) so the whole machine can be recoloured
+        by one switch instead of every draw call re-deciding its own colour.
+        A <code>local_light</code> vector &mdash; the same
+        <code>WORLD_LIGHT</code> direction as the terrain's, unwound through
+        the node's own <code>rotation</code> and <code>scale.x</code> mirror
+        &mdash; drives: a warm/shadow half-overlay on the frame, a rim
+        highlight and opposing shadow arc on each wheel centred on the light
+        angle rather than a fixed angle, and a brighter near-leg /
+        darker far-leg on the A-frame. Added wood-grain strokes on the frame
+        planks and the arm shaft, and a chip mark on each wheel rim and
+        corner bracket, for the "worn/chipped iron, visible grain" half of
+        the requirement.
+      </p>
+      <p class="req-note">
+        <b>Requirement 6 (visual half):</b> <code>_draw()</code> computes
+        <code>lost := GameState.MAX_LIVES - player.lives</code> and
+        <code>burnt := player.lives &lt;= 0</code> directly (no new API),
+        and branches <code>burnt</code> first, then <code>lost &gt;= 2</code>,
+        then <code>lost &gt;= 1</code> &mdash; <code>&gt;=</code> rather than
+        <code>==</code>, and burnt checked on <code>lives &lt;= 0</code>
+        rather than on a lost-count equal to MAX_LIVES, so both stay correct
+        however many lives a match starts with, and a dead machine can never
+        fall through to the "ablaze" branch. <code>lost == 1</code> draws a
+        small flame <i>and</i> smoke wisps (not smoke alone, per a literal
+        read of requirement 6). <code>lost == 2</code> draws two fire sources,
+        a taller flame and thicker smoke &mdash; visibly heavier than the
+        first tier. <code>lives == 0</code> swaps the working palette toward
+        char/rust/soot, draws guttering embers instead of active flame, and
+        droops and desaturates the pennant cloth. Flame, smoke and embers
+        animate off <code>Time.get_ticks_msec()</code>, read directly inside
+        the new <code>_draw_flame()</code> / <code>_draw_smoke()</code> /
+        <code>_draw_embers()</code> helpers, which already run every frame
+        via the existing <code>queue_redraw()</code> in <code>_process()</code>
+        &mdash; no change to <code>_process()</code> itself. The banner's
+        "ASHES" swap is developer1's, not touched here.
+      </p>
+      <p class="req-note">
+        <b>A correctness point worth QA's attention:</b> the catapult node is
+        both rotated (ground tilt) and mirrored (<code>scale.x</code>, for
+        facing), so a flame drawn "up" in local coordinates would lean with
+        the chassis and even invert on the mirrored facing. Fire/smoke/embers
+        are drawn inside a <code>draw_set_transform()</code> that cancels
+        both: rotation by <code>-rotation * scale.x</code> (plain
+        <code>-rotation</code> only cancels correctly when
+        <code>scale.x == 1</code>; the extra <code>* scale.x</code> is what
+        makes it exact for the mirrored facing too &mdash; worked out
+        algebraically from Godot's <code>R(rotation) * diag(scale.x, 1)</code>
+        transform composition, then checked against a forced 0.35&nbsp;rad
+        tilt on a left-facing machine, see verification below), and scale by
+        <code>Vector2(scale.x, 1.0)</code> (self-cancelling since
+        <code>scale.x</code> is &plusmn;1). The result is a plume that stays
+        vertical in world space regardless of slope or facing.
+      </p>
+      <p class="req-note">
+        <b>Verification:</b>
+        <code>$GODOT_BIN --headless --path . --script tests/run_tests.gd</code>
+        &mdash; PASS, 61/61 checks (unaffected by a pure-drawing change, run
+        to confirm no accidental breakage).
+        <code>$GODOT_BIN --path . --resolution 1920x1080 --script
+        tools/shoot.gd -- all build/shots</code> &mdash; all six shots
+        rendered with no script errors in the Godot console output. Read
+        <code>battle.png</code> and <code>crater.png</code> back and
+        cropped/zoomed with the python3+PIL one-liner: confirmed the strata
+        wobble, weathering, cracks and rubble render as intended, and that
+        the crater bowl's near-vertical walls carve cleanly with no polygon
+        tearing at the rim. The frame's directional light/shadow overlay was
+        checked numerically rather than by eye, since at its current 0.12/0.16
+        alpha it is subtle at gameplay scale: sampled mean luminance of the
+        frame's left half vs. right half for both catapults from
+        <code>battle.png</code> pixels directly (python3+PIL). Both the
+        unmirrored (facing right) and mirrored (facing left) catapult came
+        back brighter on their world-left half (88.1 vs 78.4, and 88.0 vs
+        77.2) &mdash; i.e. both agree on which side of the screen is "toward
+        the sun" despite one of them being drawn in mirrored local
+        coordinates, which is the actual claim
+        <code>local_light.x *= scale.x</code> makes. A throwaway harness modeled on
+        <code>tools/shoot.gd</code> (written to <code>tools/</code>, deleted
+        before finishing, never committed) rendered: the terrain on
+        <code>field_01</code> (the cold Alpine plate, <code>rock_color
+        #3c444d</code>, <code>crust_color #dfe6ec</code>) to confirm the new
+        detail work stays cold and blue-grey there rather than picking up a
+        hardcoded warm tint; all four life states (pristine, singed, ablaze,
+        burnt) side by side; and one catapult with a forced 0.35&nbsp;rad
+        tilt, facing left, at <code>lives = 1</code>, to check the flame
+        stayed visibly vertical against a clearly tilted, mirrored chassis
+        (it did). <code>$GODOT_BIN --path . --script tools/playthrough.gd --
+        8</code> (real window) &mdash; PASS, 8/8 matches (5&ndash;24 turns
+        each), confirming the turn machine and win condition are unaffected
+        by a pure-<code>_draw()</code> change.
+      </p>
+      <p class="req-note">
+        <b>Stayed inside the owned file list</b>
+        (<code>src/battle/terrain.gd</code>, <code>src/battle/catapult.gd</code>)
+        throughout, and did not touch any of
+        <code>catapult.gd</code>'s <code>_process()</code>,
+        <code>setup()</code>, <code>_sample_ground_angle()</code>,
+        <code>ground_tilt()</code>, <code>set_step_offset()</code>,
+        <code>commit_position()</code>, <code>muzzle()</code>,
+        <code>body_centre()</code>, <code>_arm_tip()</code> or
+        <code>play_fire()</code>. No changes needed outside the owned files.
+      </p>
+    </div>
+
+    <div class="req">
+      <div class="req-head">
+        <span class="req-title">Developer (phase 2) &mdash; requirement 3</span>
+      </div>
+      <p class="req-note">
+        <b>New file, <code>src/core/knockback.gd</code>:</b> pure and
+        node-free (<code>class_name Knockback extends RefCounted</code>),
+        following <code>src/core/ballistics.gd</code>'s pattern exactly.
+        <code>RADIUS := 160.0</code>, <code>MAX_PUSH := 60.0</code>, and
+        <code>static func push_for(distance: float) -&gt; float</code> returns
+        <code>MAX_PUSH * clampf(1.0 - distance / RADIUS, 0.0, 1.0)</code>
+        &mdash; full push at zero distance, linear falloff to nothing at the
+        radius edge.
+      </p>
+      <p class="req-note">
+        <b>Wiring, <code>Battlefield._on_impact</code>:</b> a new loop runs
+        after the existing crater-carve and the existing damage loop, over
+        every catapult in <code>_catapults</code> whose
+        <code>player.is_alive()</code> is true (a burnt wreck at zero lives
+        is never shoved). For each: <code>distance :=
+        where.distance_to(catapult.body_centre())</code>,
+        <code>push := Knockback.push_for(distance)</code>; if
+        <code>push &gt; 0.0</code>, <code>direction :=
+        signf(catapult.position.x - where.x)</code> (falling back to
+        <code>1.0</code> when <code>signf</code> returns exactly zero &mdash;
+        an impact directly below or above the catapult), then
+        <code>catapult.nudge(direction * push)</code>.
+      </p>
+      <p class="req-note">
+        <b><code>src/battle/catapult.gd</code>:</b> exactly one new method
+        added, <code>func nudge(dx: float) -&gt; void</code>, placed right
+        after <code>commit_position()</code>. It does
+        <code>base_x = clampf(base_x + dx, 70.0, Terrain.WIDTH - 70.0)</code>
+        then <code>position.x = base_x</code> &mdash; the same clamp bounds
+        <code>set_step_offset()</code> already uses, so a shove can never push
+        a catapult off the field, and writing <code>base_x</code> (not just
+        <code>position.x</code>) means the shove survives into that
+        catapult's own next turn. Nothing else in the file was touched:
+        <code>_draw()</code>, <code>_draw_wheel()</code>,
+        <code>_draw_arm()</code> and every colour constant are byte-for-byte
+        the designer's phase-1 work &mdash; confirmed with
+        <code>git diff -- src/battle/catapult.gd | grep '^+func'</code>,
+        which shows only <code>nudge()</code> as a change I introduced
+        against the designer's already-uncommitted additions.
+      </p>
+      <p class="req-note">
+        <b>Test, <code>tests/run_tests.gd</code>:</b> a new
+        <code>_test_knockback()</code> checks
+        <code>push_for(0.0) == MAX_PUSH</code>,
+        <code>push_for(RADIUS) == 0.0</code>,
+        <code>push_for(RADIUS * 0.5) == MAX_PUSH * 0.5</code>, and
+        <code>push_for(RADIUS * 2.0) == 0.0</code>.
+      </p>
+      <p class="req-note">
+        <b>Verification:</b>
+        <code>$GODOT_BIN --headless --path . --script tests/run_tests.gd</code>
+        &mdash; PASS, 65/65 checks, exit 0 (the 4 new knockback checks on top
+        of the 61 from phase 1). Registering the new
+        <code>class_name Knockback</code> needed one editor pass
+        (<code>$GODOT_BIN --editor --headless --path . --quit-after 3</code>)
+        to refresh <code>.godot/global_script_class_cache.cfg</code> before
+        the headless script runner could resolve the identifier &mdash; a
+        one-time step, not a code change.
+        <code>$GODOT_BIN --path . --script tools/playthrough.gd -- 12</code>
+        (real window) &mdash; PASS, 12/12 matches, turns per match ranged
+        5&ndash;27, no catapult got stuck or ended up unable to take its turn,
+        confirming the knockback doesn't destabilise the turn machine even
+        after many repeated shoves in a single match. Visual check: a
+        throwaway script modeled on <code>tools/shoot.gd</code> (written to
+        <code>tools/</code>, deleted after use, never committed) forced an
+        impact 40px from a catapult's <code>body_centre()</code> and captured
+        before/after screenshots. Read back and cropped/zoomed with
+        python3+PIL: the catapult (and its standard) visibly shifted away
+        from the blast (base_x 1730 &rarr; 1685, a 45px push matching
+        <code>push_for(40.0)</code>) while staying planted on the ground and
+        well inside the field &mdash; a clear but not absurd amount of
+        drama, so <code>MAX_PUSH = 60</code> was kept at the team lead's
+        original value, no retuning needed.
+      </p>
+      <p class="req-note">
+        <b>Stayed inside the owned file list</b>
+        (<code>src/core/knockback.gd</code>, <code>tests/run_tests.gd</code>,
+        <code>src/battle/battlefield.gd</code>, and
+        <code>src/battle/catapult.gd</code>'s new <code>nudge()</code> method
+        only) throughout. No other file needed touching.
+      </p>
+      <p class="req-note">
+        <b>Flagged for the team lead/orchestrator, not fixed here:</b> a
+        discovered interaction between <code>nudge()</code> and mid-turn
+        repositioning. If the <i>current shooter</i> has already dialled in a
+        nonzero <code>step_offset</code> (so <code>position.x = base_x +
+        step_offset * STEP_PIXELS</code>) and a blast then shoves that same
+        catapult &mdash; self-injury from a too-close shot is explicitly
+        by-design per requirement 4 &mdash; <code>nudge()</code> writes
+        <code>position.x = base_x</code>, which silently drops the step
+        displacement rather than adding <code>dx</code> on top of it.
+        Reproduced with a throwaway script (written to <code>tools/</code>,
+        deleted after use): a catapult at <code>base_x = 190</code>, stepped
+        to <code>step_offset = 2</code> (<code>position.x = 242</code>), hit
+        by a blast 40px from its centre (<code>push_for(40.0) = 45</code>,
+        <code>direction = -1</code>) ends up at <code>base_x = position.x =
+        145</code> &mdash; a 97px on-screen jump, not the 45px the push
+        formula computed, and the two repositioning steps the player just
+        took are discarded outright rather than combined with the shove.
+        <code>step_offset</code> itself is left stale at 2 until
+        <code>_end_turn()</code>'s <code>commit_position()</code> zeroes it.
+        This is exactly the specified formula
+        (<code>base_x = clampf(base_x + dx, 70.0, Terrain.WIDTH -
+        70.0); position.x = base_x</code>) behaving exactly as dictated
+        &mdash; not a bug in this implementation &mdash; but whether a
+        self-inflicted knockback should stack on top of an in-progress step
+        offset, or override it, or whether self-knockback should be excluded
+        entirely, is a design call above this ticket's scope. Left
+        unchanged pending that call.
+      </p>
+    </div>
+
+    <div class="req">
+      <div class="req-head">
+        <span class="req-title">Bugfix pass &mdash; QA's blocking issue: self-knockback discarding the step offset</span>
+      </div>
+      <p class="req-note">
+        <b>Verdict on the earlier &quot;design call&quot; punt above:</b> QA's
+        second review treated it as a bug, not a design question, and asked
+        for a fix rather than a decision. Resolved as: a knockback shoves
+        from wherever the catapult currently stands, stacking on top of any
+        in-progress reposition rather than overriding it &mdash; the option
+        the earlier build-log entry framed as one of three choices, picked
+        because it is the only one where a player's own input is never
+        silently thrown away.
+      </p>
+      <p class="req-note">
+        <b><code>src/battle/catapult.gd</code> <code>nudge()</code>:</b>
+        changed from shoving off <code>base_x</code> (the turn's starting
+        position) to shoving off <code>position.x</code> (wherever the
+        machine actually stands right now, stepped or not), then folding the
+        result into both <code>base_x</code> <i>and</i> <code>step_offset =
+        0</code> &mdash; the same pair <code>commit_position()</code> already
+        sets, so a shove reads as "the turn's repositioning is now settled
+        here" rather than leaving a step count that no longer matches
+        reality. Three lines changed, nothing else in the file touched.
+      </p>
+      <p class="req-note">
+        <b>The HUD half of the same bug:</b> zeroing the field alone doesn't
+        move a pixel on screen by itself &mdash; something has to re-read it.
+        Checked <code>src/hud/hud.gd</code>: <code>track.value</code> (the
+        "STEPS (MOVE)" readout) is only written inside
+        <code>Hud.refresh()</code>, never on a per-frame path. In
+        <code>src/battle/battlefield.gd</code> <code>_on_impact()</code>, the
+        existing <code>_hud.refresh(game)</code> call sat between the damage
+        loop and the knockback loop &mdash; i.e. <i>before</i>
+        <code>nudge()</code> could run &mdash; so even with the field
+        corrected, the on-screen step count would have kept showing the
+        pre-nudge value for the whole 0.95s resolve pause, which is exactly
+        the second symptom QA reported (&quot;the HUD's 'RIGHT 2 STEPS' label
+        and the on-field position visibly disagree&quot;). Moved that single
+        <code>_hud.refresh(game)</code> call to after the knockback loop
+        instead of adding a second call, so it now picks up both the life
+        decrement and the corrected step in one pass, in the same frame as
+        before (nothing async runs between the two loops, so the life-pip
+        update timing is unchanged).
+      </p>
+      <p class="req-note">
+        <b>New test, <code>tests/run_tests.gd</code> <code>_test_nudge()</code>:</b>
+        builds a bare <code>Catapult</code> (freed after, following the
+        existing <code>Terrain</code> pattern in this file), steps it to
+        <code>base_x = 190</code>, <code>step_offset = 2</code>
+        (<code>position.x = 242</code>, matching <code>GameState.STEP_PIXELS
+        = 26</code>), then nudges it by <code>-Knockback.push_for(40.0)</code>
+        (<code>-45</code>) and checks the result lands at
+        <code>242 - 45 = 197</code>, that <code>base_x</code> now equals
+        <code>position.x</code>, and that <code>step_offset == 0</code>
+        &mdash; QA's exact repro numbers, at the field level.
+      </p>
+      <p class="req-note">
+        <b>Verification:</b>
+        <code>$GODOT_BIN --headless --path . --script tests/run_tests.gd</code>
+        &mdash; PASS, 69/69 checks (65 prior + 4 new in
+        <code>_test_nudge()</code>).
+        <code>$GODOT_BIN --path . --script tools/playthrough.gd -- 12</code>
+        (real window) &mdash; PASS, 12/12 matches, 5&ndash;20 turns each, no
+        stuck turns; this run predates the <code>battlefield.gd</code>
+        refresh-ordering edit (started before it, and
+        <code>playthrough.gd</code> never reads HUD or step state, so that
+        ordering isn't part of what it exercises) but does confirm the
+        <code>nudge()</code> field fix doesn't destabilise the turn machine.
+        A throwaway probe script (modelled on <code>tools/shoot.gd</code>,
+        written to <code>tools/</code>, deleted after use, never committed)
+        drove a real <code>Battlefield</code> end to end &mdash; stepped the
+        current shooter's catapult exactly as in the repro, called
+        <code>battle._on_impact()</code> directly with an impact point 40px
+        from the catapult's centre, and read
+        <code>battle._hud.track.value</code> immediately afterward, i.e.
+        mid-resolve-pause, before <code>_end_turn()</code> ever runs. Result:
+        <code>position.x</code> landed at <code>197.00</code> (matching the
+        unit test), and <code>battle._hud.track.value == 0</code> right away
+        rather than staying at the stale <code>2</code> &mdash; confirming
+        the display fix, not just the field, end to end through the real
+        wiring. Also re-shot <code>battle</code> and <code>crater</code> via
+        <code>tools/shoot.gd</code> at 1920&times;1080 and read both PNGs
+        back: the ordinary (non-knockback) step readout and the post-impact
+        turn handoff both still render correctly, so moving the
+        <code>refresh()</code> call introduced no regression on the common
+        path.
+      </p>
+      <p class="req-note">
+        <b>Stayed inside the touched-file list</b>
+        (<code>src/battle/catapult.gd</code>'s <code>nudge()</code> only,
+        <code>src/battle/battlefield.gd</code>'s <code>_on_impact()</code>
+        only, and <code>tests/run_tests.gd</code>); no drawing code touched.
+        README's stale &quot;Two hits&quot;/&quot;MAX_LIVES (2)&quot; lines
+        (8 and 116), and requirement 1's terrain/backdrop seam, are QA
+        findings outside this fix's scope and were left as-is.
+      </p>
+    </div>
+  </div>
+
+  <h2>QA</h2>
+  <!-- Later steps append screenshot references, test output, and playthrough
+       results here. -->
+  <div id="qa-section">
+    <div class="req">
+      <div class="req-head">
+        <span class="req-title">First review pass &mdash; playtest against all six requirements</span>
+      </div>
+      <p class="req-note">
+        <b>Verdict: NEEDS_FIXES.</b> Requirement 1 lands partial (real
+        improvement, not yet closing the gap the reference paintings set),
+        and a reproducible logic bug was found in the requirement 3 wiring.
+        Full detail below; nothing here is a guess &mdash; every claim was
+        checked by running the actual build.
+      </p>
+      <p class="req-note">
+        <b>Automated checks:</b>
+        <code>tests/run_tests.gd</code> headless &mdash; PASS, 65/65 checks.
+        <code>tools/playthrough.gd -- 16</code> (real window) &mdash; PASS,
+        16/16 matches finished cleanly under the new 3-life rule, no stuck
+        turns, turn counts ranged 4&ndash;16.
+      </p>
+      <p class="req-note">
+        <b>Requirement 2 (three lives):</b> met. <code>MAX_LIVES = 3</code>,
+        banner pips, tests and playthrough all agree.
+      </p>
+      <p class="req-note">
+        <b>Requirement 5 (&quot;Fallen&quot; removed):</b> met. Grepped all of
+        <code>src/</code>, <code>tools/</code>, <code>tests/</code> for
+        &quot;fallen&quot;/&quot;FALLEN&quot; (case-insensitive) &mdash; zero
+        hits. The death label now reads &quot;ASHES&quot;, confirmed on
+        screen by forcing a 0-lives banner and reading the screenshot back.
+      </p>
+      <p class="req-note">
+        <b>Requirement 4 (near miss still injures):</b> met. This threshold
+        pre-dates this build phase (<code>Damage.BLAST_RADIUS</code> 96px was
+        already wider than <code>Catapult.HIT_RADIUS</code> 36px), and this
+        pass mainly documented and tested it. Verified empirically, not just
+        by reading the diff: forced a blast 70px from a catapult's centre
+        (well past a &quot;direct hit&quot; but inside the blast radius) via
+        <code>Battlefield._on_impact()</code> directly, and its life count
+        dropped 3&rarr;2.
+      </p>
+      <p class="req-note">
+        <b>Requirement 3 (knockback):</b> met, but with a real bug found
+        alongside it &mdash; see Issues. The push formula itself works and is
+        unit tested; a forced 70px-distant blast shoved a catapult from
+        <code>x=1730</code> to <code>x=1696.25</code> (34px, matching
+        <code>Knockback.push_for(70)</code>), confirmed by screenshot
+        before/after.
+      </p>
+      <p class="req-note">
+        <b>Requirement 6 (fire/smoke/burnt):</b> met, with a legibility
+        caveat. Forced all four life states (3/2/1/0 remaining) and read the
+        screenshots at full 1920&times;1080 scale, not just cropped: the
+        burnt (0-life) state reads clearly &mdash; charred colours, drooped
+        pennant, guttering embers, unmistakably different from a live
+        machine. The injured (singed/ablaze) states are correct in code and
+        visible on close zoom, but the flame/smoke plume is only a few
+        pixels tall at actual gameplay resolution and easy to miss at a
+        glance &mdash; see Issues.
+      </p>
+      <p class="req-note">
+        <b>Requirement 1 (realistic terrain/catapults):</b> partial. This is
+        a genuine improvement over a flat fill: zoomed screenshots confirm
+        four wobbling strata bands, weathering blotches, cracks, scattered
+        rubble, and a directional rim-light/shadow consistent with the
+        golden-hour sun both on a warm field and (checked separately) on the
+        cold Alpine field, where it correctly stays blue-grey rather than
+        picking up a false warm tint. But held up against
+        <code>reference/ready to fire/ready-1.png</code> and
+        <code>ready-3.png</code> for calibration, there is still a visible
+        style seam where the photographic backdrop plate meets the flat
+        vector-cartoon terrain silhouette in front of it &mdash; the terrain
+        reads as a distinctly separate, simpler graphic layer, not yet
+        closing the gap the requirement asks for. Given the stated
+        constraint (procedural <code>_draw()</code> only, no asset
+        pipeline), this may be close to the practical ceiling, but it is not
+        there yet.
+      </p>
+      <p class="req-note">
+        <b>Bug found &mdash; self-knockback silently discards an in-progress
+        reposition:</b> reproduced directly against
+        <code>Catapult.nudge()</code> and <code>Battlefield._on_impact()</code>,
+        not just read from the diff. Sequence: shooter steps 2
+        (<code>base_x=190</code> &rarr; <code>position.x=242</code>), then
+        fires a shot that lands close enough to knock itself (needs only
+        <code>distance &lt; Knockback.RADIUS</code> = 160px &mdash; a wider,
+        more reachable band than the 96px self-injury the code already
+        documents as intentional). <code>nudge()</code> computes
+        <code>base_x = clampf(base_x + dx, ...)</code> then sets
+        <code>position.x = base_x</code>, discarding the step displacement
+        rather than shoving from the stepped position: measured result
+        <code>base_x = position.x = 145</code>, not the
+        <code>242 + dx</code> a player would expect. <code>step_offset</code>
+        itself is left stale (still reads 2) until end of turn, so the HUD's
+        &quot;RIGHT 2 STEPS&quot; label and the on-field position visibly
+        disagree for the ~1s resolve pause. The team's own build log in this
+        file already flagged this and left it unresolved pending a design
+        call &mdash; QA's read is that a player's input silently vanishing is
+        a real bug, not just a design question, though it is narrow (only
+        reachable via self-inflicted knockback).
+      </p>
+      <p class="req-note">
+        <b>Issues list</b> (also returned in the structured verdict):
+      </p>
+      <ul class="req-note">
+        <li><b>Blocking, logic</b> &mdash;
+          <code>src/battle/catapult.gd</code> <code>nudge()</code> /
+          <code>src/battle/battlefield.gd</code> <code>_on_impact()</code>:
+          self-inflicted knockback silently discards the current turn's step
+          offset and leaves the HUD step readout stale; see repro above.</li>
+        <li><b>Minor, visual</b> &mdash; <code>src/battle/catapult.gd</code>:
+          the injured-state flame/smoke is correct but only a few pixels
+          tall at real 1920&times;1080 gameplay scale; easy to miss without
+          already knowing to look for it.</li>
+        <li><b>Minor, gameplay feel</b> &mdash;
+          <code>src/battle/battlefield.gd</code> <code>_on_impact()</code>:
+          the moment a too-close blast injures without a direct hit, the
+          only feedback is a life pip dimming in the banner (away from where
+          the player is looking) plus the same subtle fire above; there is
+          no reaction on the machine itself at the instant of the hit, so
+          the &quot;near miss still hurts&quot; mechanic reads weakly in the
+          moment even though the pip and eventual fire confirm it after the
+          fact.</li>
+        <li><b>Minor, gameplay feel</b> &mdash;
+          <code>src/battle/catapult.gd</code> <code>nudge()</code>: the
+          sideways shove is an instant position snap with no easing, applied
+          in the same instant as the existing random screen shake
+          (&plusmn;14px) in <code>Battlefield._apply_shake()</code>, so a
+          knockback in the 30&ndash;40px range is easy to read as shake noise
+          rather than a deliberate shove; a nearer, harder hit (close to
+          <code>MAX_PUSH</code>=60px) reads more clearly.</li>
+        <li><b>Minor, docs</b> &mdash; <code>README.md</code> lines 8 and 116
+          still say &quot;Two hits and a machine is out&quot; and
+          &quot;<code>MAX_LIVES</code> (2)&quot;; both are stale now that
+          <code>MAX_LIVES = 3</code>. Already flagged by the team in this
+          file's build log; repeating here since it is still unfixed.</li>
+      </ul>
+      <p class="req-note">
+        <b>Screenshots read:</b> title, battle, flight, impact, crater,
+        victory (all captured fresh at 1920&times;1080 against the current
+        working tree, crater/victory re-shot individually after an earlier
+        <code>-- all</code> run timed out from GPU contention with a
+        concurrently running playthrough); all four forced life states
+        (3/2/1/0 remaining lives) at full resolution and zoomed; a forced
+        knockback before/after pair; and <code>reference/ready to
+        fire/ready-1.png</code> and <code>ready-3.png</code> for calibration.
+        A throwaway probe script modelled on <code>tools/shoot.gd</code> was
+        used for the forced-state and bug-repro shots, written to
+        <code>tools/</code> and deleted after use, matching the convention
+        already established in this file's build log &mdash; never
+        committed.
+      </p>
+    </div>
+
+    <div class="req">
+      <div class="req-head">
+        <span class="req-title">Recheck pass &mdash; verifying the bugfix, then a full playtest again</span>
+      </div>
+      <p class="req-note">
+        <b>Verdict: PASS.</b> The previously-blocking self-knockback bug is
+        confirmed fixed, both at the unit level and end to end through the
+        real turn machine. Nothing new is blocking. The same handful of
+        minor issues from the first pass remain, unchanged, since they were
+        not in this fix round's scope. To be plain about where this PASS
+        comes from: it is the bug going away, not requirement 1 improving
+        &mdash; requirement 1 is still graded <b>partial</b> for the same
+        reason as the first pass, and this pass judges that partial result
+        to already be close to the practical ceiling for a procedural
+        <code>_draw()</code>-only terrain, not a gap the team failed to
+        close. Every claim below was checked against a running build, not
+        inferred from the diff.
+      </p>
+      <p class="req-note">
+        <b>The blocking issue, specifically re-checked:</b> confirmed fixed.
+        <code>Catapult.nudge()</code> now shoves from <code>position.x</code>
+        (wherever the machine currently stands) rather than <code>base_x</code>,
+        and folds the result into both <code>base_x</code> and
+        <code>step_offset = 0</code>; <code>Battlefield._on_impact()</code>'s
+        one <code>_hud.refresh(game)</code> call now sits after the knockback
+        loop instead of before it. Checked three ways: (1) the new
+        <code>tests/run_tests.gd</code> <code>_test_nudge()</code> passes,
+        reproducing the original repro numbers at the field level
+        (<code>base_x=190</code>, step to <code>position.x=242</code>, nudge
+        by <code>-push_for(40.0)</code>, lands at <code>197</code>,
+        <code>base_x==position.x</code>, <code>step_offset==0</code>); (2) a
+        throwaway script (modelled on <code>tools/shoot.gd</code>, written to
+        <code>tools/</code>, deleted after use, never committed) drove a real
+        <code>Battlefield</code> end to end &mdash; stepped the current
+        shooter to <code>base_x=190, step_offset=2</code>
+        (<code>position.x=242</code>), called <code>battle._on_impact()</code>
+        with a self-inflicted blast 40px from its own <code>body_centre()</code>,
+        and read <code>battle._hud.track.value</code> immediately afterward:
+        result <code>position.x=197.00</code>, <code>base_x=197.00</code>,
+        <code>step_offset=0</code>, <code>hud.track.value=0</code> &mdash;
+        exactly matching the push formula, with no stale HUD readout; (3)
+        the full suite is green: <code>tests/run_tests.gd</code> headless
+        &mdash; PASS, 69/69 checks.
+      </p>
+      <p class="req-note">
+        <b>Automated checks, full pass:</b>
+        <code>tests/run_tests.gd</code> headless &mdash; PASS, 69/69 checks.
+        <code>tools/playthrough.gd -- 18</code> (real window) &mdash; PASS,
+        18/18 matches finished cleanly under the 3-life rule, no stuck turns,
+        no second shot ever accepted mid-flight, turn counts ranged
+        5&ndash;21 across both winners (Marcus 10, Victor 8), nowhere near
+        the 400-turn safety cap.
+      </p>
+      <p class="req-note">
+        <b>Requirement 2 (three lives):</b> met. <code>GameState.MAX_LIVES
+        = 3</code>; the banner shows three pips per living player in every
+        screenshot; <code>game_state.player lives</code> tests cover all
+        three decrements plus the fatal third hit.
+      </p>
+      <p class="req-note">
+        <b>Requirement 5 (&quot;Fallen&quot; removed):</b> met. Grepped the
+        whole repo (not just <code>src/</code>) case-insensitively for
+        &quot;fallen&quot; &mdash; the only hits left are this
+        <code>progress.html</code> file's own history of the change; nothing
+        in any <code>.gd</code> file. The death label reads
+        <b>ASHES</b>, confirmed on screen in the <code>burnt.png</code> shot.
+      </p>
+      <p class="req-note">
+        <b>Requirement 4 (near miss still injures):</b> met, re-verified
+        with a clean, isolated repro. Forced a blast 85.9px from a single
+        catapult's <code>body_centre()</code> &mdash; well past
+        <code>Catapult.HIT_RADIUS</code> (36px, a &quot;direct hit&quot;) but
+        inside <code>Damage.BLAST_RADIUS</code> (96px) &mdash; via
+        <code>Battlefield._on_impact()</code>. Life count dropped
+        3&rarr;2 (printed and confirmed), and the screenshot
+        (<code>injury_after.png</code>) shows the blast landing visibly
+        clear of the machine itself, with the life pip in the banner
+        dimming and a first flame lick appearing on the catapult as the only
+        feedback. Worth noting for requirement 3 below: this same blast, at
+        85.9px, was also inside <code>Knockback.RADIUS</code> (160px), so
+        the target catapult was shoved sideways (<code>push_for(85.9)
+        &asymp; 27.8px</code>) in the same impact &mdash; a near miss
+        doesn't just injure, it nudges too.
+      </p>
+      <p class="req-note">
+        <b>Requirement 3 (knockback):</b> met. Re-verified with two
+        catapults deliberately placed 150px apart (inside
+        <code>Knockback.RADIUS</code>=160) and a blast detonated at their
+        midpoint: printed positions moved <code>900.0&rarr;870.9</code> and
+        <code>1050.0&rarr;1081.6</code>, matching <code>push_for(75)</code>
+        on each side within a pixel. A before/after crop comparison
+        (<code>zoom_knockback_compare.png</code>, built with python3+PIL)
+        makes the shove unambiguous: each catapult's legion standard stays
+        planted exactly where it was, while the machine itself visibly slides
+        away from it &mdash; a clean visual tell that would be much harder to
+        read if the standard moved with it. This mechanic is not a rare edge
+        case in real play, worth being explicit about: <code>Knockback.RADIUS</code>
+        (160px) is measured from the impact point to a catapult's own
+        <code>body_centre()</code>, independent of how far apart the two
+        catapults stand, and it is strictly wider than
+        <code>Damage.BLAST_RADIUS</code> (96px) &mdash; so every single hit,
+        plus the near-miss band out to 160px, nudges the struck machine too.
+        The requirement-4 repro above is itself an example: an 85.9px near
+        miss both injured and shoved the same catapult in one impact.
+      </p>
+      <p class="req-note">
+        <b>Requirement 6 (fire/smoke/burnt):</b> met. Re-read all forced life
+        states at 1920&times;1080. The burnt (0-life) wreck reads clearly and
+        immediately even at gameplay scale &mdash; charred black-brown wood,
+        rust-toned iron, a drooped and desaturated pennant, faint guttering
+        embers, unmistakably different from a live machine at a glance. The
+        injured tiers (2 lives = one small flame + faint smoke; 1 life = two
+        flame sources and a visible rising smoke plume) are correct and were
+        spotted unaided at full resolution, not only on a zoomed crop &mdash;
+        but they are a small, single flame lick rather than a prominent
+        effect, so a player glancing quickly rather than already looking for
+        it could miss the distinction between the two injured tiers; see
+        Issues. Unchanged from the first pass since this fix round did not
+        touch <code>catapult.gd</code> drawing code. <b>New this pass:</b>
+        checked whether the burnt state is actually visible at the moment a
+        player would see it, not just in a forced static shot &mdash; drove a
+        real match through <code>src/Main.tscn</code> to a lethal hit and
+        captured mid-way through the 0.95s <code>RESOLVE_PAUSE</code>, before
+        <code>GameOverScreen</code>'s 78%-alpha scrim comes up. Confirmed the
+        charred palette and embers are legible during that live window, not
+        only after the fact in a forced screenshot or hidden entirely behind
+        the scrim.
+      </p>
+      <p class="req-note">
+        <b>Requirement 1 (realistic terrain/catapults):</b> unchanged since
+        the first pass, as expected &mdash; this fix round's diff touches
+        only <code>Catapult.nudge()</code> and the refresh ordering in
+        <code>Battlefield._on_impact()</code>, nothing in either file's
+        <code>_draw()</code>. Re-read <code>battle.png</code> zoomed against
+        <code>reference/ready to fire/ready-3.png</code>: the catapult itself
+        (wood grain, tapered wheels, riveted iron, a loaded sling) holds up
+        well next to the painted reference. The terrain still reads as a
+        flatter, more graphic layer against the photographic backdrop plate
+        &mdash; still <b>partial</b>, same ceiling noted before given the
+        procedural-<code>_draw()</code>-only constraint.
+      </p>
+      <p class="req-note">
+        <b>Issues list</b> (also returned in the structured verdict). The
+        blocking issue from the first pass is gone; everything below is
+        minor and was minor before this fix round too, plus one new note:
+      </p>
+      <ul class="req-note">
+        <li><b>Minor, visual</b> &mdash; <code>src/battle/catapult.gd</code>:
+          unchanged from the first pass &mdash; the injured-state flame/smoke
+          is correct but only a few pixels tall at real 1920&times;1080
+          gameplay scale, easy to miss without already knowing to look for
+          it.</li>
+        <li><b>Minor, gameplay feel</b> &mdash;
+          <code>src/battle/battlefield.gd</code> <code>_on_impact()</code>:
+          unchanged &mdash; a too-close-but-not-direct injury has no reaction
+          on the machine at the instant of the hit, only a banner pip dim
+          plus the same subtle fire after the fact.</li>
+        <li><b>Minor, gameplay feel</b> &mdash;
+          <code>src/battle/catapult.gd</code> <code>nudge()</code>: unchanged
+          &mdash; the shove is an instant snap with no easing, and at
+          30&ndash;40px it can read as the existing screen-shake noise rather
+          than a deliberate push; the demo shot in this pass used a much
+          closer blast (75px from each machine, near <code>MAX_PUSH</code>)
+          precisely because that is where it reads clearly.</li>
+        <li><b>Minor, docs</b> &mdash; <code>README.md</code> lines 8 and 116
+          still say &quot;Two hits and a machine is out&quot; and
+          &quot;<code>MAX_LIVES</code> (2)&quot;; still stale, still
+          unfixed, still outside this pass's scope.</li>
+      </ul>
+      <p class="req-note">
+        <b>Screenshots read this pass:</b> title, battle, flight, impact,
+        crater, victory (freshly re-shot at 1920&times;1080, all six read
+        individually, including <code>flight.png</code> for the in-air stone
+        and ghost arc); forced <code>fire_states</code> (lives 2 and 1 side
+        by side) and <code>burnt</code> (lives 0), each read at full
+        resolution and zoomed; a forced <code>knockback</code> before/after
+        pair (staged, printed positions cross-checked against the push
+        formula) and its cropped side-by-side comparison; a forced
+        <code>injury</code> before/after pair, both frames read (an isolated
+        too-close-not-direct hit); a live-fire death-moment pair driven
+        through the real <code>src/Main.tscn</code> flow, captured mid-pause
+        (before the game-over scrim) and after; and <code>reference/ready to
+        fire/ready-3.png</code> for calibration. Three throwaway probe
+        scripts modelled on <code>tools/shoot.gd</code> were used (forced
+        states/knockback/injury; the end-to-end nudge-bug repro; the
+        live-fire death-moment timing), all written to <code>tools/</code>
+        and deleted immediately after use, never committed.
+      </p>
+    </div>
+  </div>
+
+  <footer>Roman Catapults — internal build dashboard. Not part of the game, not tracked by git.</footer>
+</div>
+</body>
+</html>
