@@ -93,11 +93,19 @@ jobs:
           for f in build/web/index.wasm build/web/index.pck; do
             raw=$(wc -c < "$f")
             gz=$(gzip -9 -c "$f" | wc -c)
-            printf '%s  raw %4d MB  gzip %4d MB\n' \
-              "$(basename "$f")" $((raw / 1048576)) $((gz / 1048576))
+            # Integer MB rounds 39.5 down to 37 and 2.0 down to 1, which is how
+            # you end up quoting a size the users never see. Keep one decimal.
+            awk -v n="$(basename "$f")" -v r="$raw" -v g="$gz" \
+              'BEGIN { printf "%-12s raw %6.1f MB   gzip %6.1f MB\n", n, r/1048576, g/1048576 }'
           done
 
       - name: Prove it boots in a real browser
+        # The runner image presets PLAYWRIGHT_BROWSERS_PATH to a preinstalled
+        # cache that holds no chromium for the version installed here, so the
+        # launch looks for a browser that was never put there. Point both the
+        # install and the run at our own directory instead.
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
         run: |
           npm install --no-save playwright
           npx playwright install --with-deps chromium

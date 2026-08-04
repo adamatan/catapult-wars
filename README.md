@@ -1,5 +1,8 @@
 # Roman Catapults
 
+**[Play it](https://adamatan.github.io/catapult-wars/)** — two players, one
+keyboard, in the browser.
+
 A two-player turn-based artillery duel in Godot — Scorched Earth with onagers,
 dressed in the imperial Roman style of the mockups in `reference/`.
 
@@ -49,17 +52,53 @@ and set `GODOT_BIN`.
 
 ### Hosting
 
+Every push to `main` builds the export and deploys it, via
+`.github/workflows/pages.yml`. Nothing is committed: `build/` stays gitignored
+and Pages takes the artifact straight from the run.
+
 The web preset is built **without thread support**, and this is verified rather
 than assumed: `tools/browser_check.mjs` loads the export from a server that
 sends no COOP/COEP headers and confirms it boots with
 `crossOriginIsolated=false` and no `SharedArrayBuffer`. So it drops onto any
 ordinary static host — GitHub Pages, itch.io, a plain nginx — with no special
-configuration.
+configuration. Turning threads back on for a performance win would end that,
+and would break this deploy: no static host can send the headers threads
+require.
 
-Two things worth knowing when you deploy: `index.wasm` is ~37 MB uncompressed,
-so serve it gzipped or brotli (it drops to roughly a quarter of that), and
-`.wasm` must be served as `application/wasm` or the browser refuses to stream
-it. `tools/serve.py` sets that mapping; most real hosts already do.
+`.wasm` must also be served as `application/wasm` or the browser refuses to
+stream it. `tools/serve.py` sets that mapping; most real hosts already do.
+
+### Why the download is what it is
+
+Measured on the 4.7.1 export, official template:
+
+| | raw | gzip |
+|---|---|---|
+| `index.wasm` | 39.5 MB | 9.8 MB |
+| `index.pck` — the entire game | 2.0 MB | 1.9 MB |
+| everything else | 0.3 MB | |
+
+The game is 2 MB. The rest is engine, which is why trimming art would buy
+nothing. Two things move the number instead:
+
+**Transport compression.** GitHub Pages gzips wasm on the fly, so the 39.5 MB
+is ~9.8 MB over the wire. Worth re-checking if the host ever changes:
+
+```bash
+curl -sI -H 'Accept-Encoding: gzip' https://adamatan.github.io/catapult-wars/index.wasm
+```
+
+The `.pck` is already compressed internally and barely responds to gzip, but at
+2 MB it does not matter. Note that Cloudflare Pages caps files at 25 MB, so it
+cannot host the official-template build at all.
+
+**A smaller engine.** `.github/workflows/web-template.yml` rebuilds Godot
+without 3D, physics, XR, navigation, networking, video, and the advanced text
+server — that last one drags in ICU tables this game has no use for, being two
+Latin fonts and no shaping. It is dispatch-only, takes close to an hour, and
+publishes the result as a release asset; `pages.yml` picks it up automatically
+and falls back to the official template when it is absent. Re-run it when the
+engine version changes.
 
 ## Controls
 
