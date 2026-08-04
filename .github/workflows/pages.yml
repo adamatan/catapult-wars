@@ -17,10 +17,6 @@ concurrency:
 
 env:
   GODOT_VERSION: 4.7.1-stable
-  # Built by web-template.yml. Until it has been run once this is absent and the
-  # build falls back to the official template, which works but is four times the
-  # size over the wire.
-  SLIM_TEMPLATE_TAG: web-template-4.7.1-slim
 
 jobs:
   build:
@@ -54,6 +50,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Derived, never hardcoded: a tag pinned separately from GODOT_VERSION
+          # would go on serving a 4.7.1 engine to a 4.8 editor, and the
+          # version.txt written below would hide the mismatch rather than fail
+          # on it. web-template.yml builds the tag by the same rule.
+          SLIM_TEMPLATE_TAG="web-template-${GODOT_VERSION%-stable}-slim"
+          echo "tag=$SLIM_TEMPLATE_TAG" >> "$GITHUB_OUTPUT"
           if gh release download "$SLIM_TEMPLATE_TAG" \
                --pattern web_nothreads_release.zip --dir /tmp/slim 2>/dev/null; then
             echo "found=true" >> "$GITHUB_OUTPUT"

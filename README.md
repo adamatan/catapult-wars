@@ -70,7 +70,8 @@ stream it. `tools/serve.py` sets that mapping; most real hosts already do.
 
 ### Why the download is what it is
 
-A first visit costs **7.8 MB**. Measured on the live site, not estimated:
+A first visit costs **7.5 MB**. Measured on the live site, not estimated
+(every figure here is MiB, as `du` and `wc -c` report it):
 
 ```bash
 curl -sI -H 'Accept-Encoding: gzip' https://adamatan.github.io/catapult-wars/index.wasm
@@ -78,8 +79,8 @@ curl -sI -H 'Accept-Encoding: gzip' https://adamatan.github.io/catapult-wars/ind
 
 |  | stock engine | slim engine | on the wire |
 |---|---|---|---|
-| `index.wasm` | 39.5 MB | 22.5 MB | **5.9 MB** |
-| `index.pck` — the entire game | 2.0 MB | 2.0 MB | **1.9 MB** |
+| `index.wasm` | 39.5 MB | 22.5 MB | **5.7 MB** |
+| `index.pck` — the entire game | 2.0 MB | 2.0 MB | **1.8 MB** |
 | everything else | 0.3 MB | 0.3 MB | |
 
 The game is 2 MB of that. Everything else is engine, which is why trimming art
