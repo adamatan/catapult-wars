@@ -134,9 +134,37 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # The pre-deploy check proves the bundle boots off a local server. It does not
+  # prove the deployed thing boots: that one is served by GitHub with a service
+  # worker in front of it, and neither existed when the bundle was tested. This
+  # plays the real URL.
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Play the live site
+        env:
+          SITE: ${{ needs.deploy.outputs.page_url }}
+        run: |
+          unset PLAYWRIGHT_BROWSERS_PATH
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+          node tools/browser_check.mjs "${SITE%/}/index.html" build/shots/live
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-site-screenshots
+          path: build/shots/live
+          if-no-files-found: ignore
