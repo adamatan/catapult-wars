@@ -65,4 +65,6 @@ static func _load() -> void:
 		_fields.append(f)
 
 static func _rgb(triple: Array) -> Color:
-	return Color8(int(triple[0]), int(triple[1]), int(triple[2]))
+	# Not Color8: it is compatibility-only, so it vanishes from an engine built
+	# with deprecated=no — which is exactly how the shipped web template is built.
+	return Color(int(triple[0]) / 255.0, int(triple[1]) / 255.0, int(triple[2]) / 255.0)
